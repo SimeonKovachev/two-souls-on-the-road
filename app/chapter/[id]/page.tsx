@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Chapter, Mood, Author, formatDateRange } from "@/lib/types";
@@ -31,6 +31,7 @@ import { DayEntryCard } from "@/components/DayEntryCard";
 import { LettersSection } from "@/components/LettersSection";
 import { TimeCapsuleSection } from "@/components/TimeCapsuleSection";
 import { MoodVisualization } from "@/components/MoodVisualization";
+import { useAutoSave, AutoSaveIndicator } from "@/lib/useAutoSave";
 
 type TabType = "days" | "moments" | "letters" | "capsules" | "moods";
 
@@ -49,6 +50,9 @@ export default function ChapterPage() {
   const [firstImpression, setFirstImpression] = useState("");
   const [lastNightThoughts, setLastNightThoughts] = useState("");
 
+  // Track if initial values were loaded to prevent auto-save on load
+  const initialLoadedRef = useRef(false);
+
   const loadChapter = useCallback(async () => {
     const data = await getChapterById(chapterId);
     setChapter(data);
@@ -58,11 +62,82 @@ export default function ChapterPage() {
       setLastNightThoughts(data.lastNightThoughts?.text || "");
     }
     setIsLoaded(true);
+    // Mark initial load complete after a short delay
+    setTimeout(() => {
+      initialLoadedRef.current = true;
+    }, 100);
   }, [chapterId]);
 
   useEffect(() => {
     loadChapter();
   }, [loadChapter]);
+
+  // Auto-save for reflection
+  const { status: reflectionStatus, triggerSave: triggerReflectionSave } = useAutoSave({
+    delay: 1000,
+    onSave: useCallback(async () => {
+      if (!chapter || chapter.sealed) return;
+      if (reflection.trim() !== (chapter.reflection || "")) {
+        const updated = await updateChapter(chapterId, { reflection: reflection.trim() });
+        if (updated) setChapter(updated);
+      }
+    }, [chapter, chapterId, reflection]),
+  });
+
+  // Auto-save for first impression
+  const { status: firstImpressionStatus, triggerSave: triggerFirstImpressionSave } = useAutoSave({
+    delay: 1000,
+    onSave: useCallback(async () => {
+      if (!chapter || chapter.sealed || chapter.firstImpression) return;
+      if (firstImpression.trim()) {
+        const updated = await updateChapter(chapterId, {
+          firstImpression: {
+            text: firstImpression.trim(),
+            author: currentAuthor,
+            createdAt: new Date().toISOString(),
+          },
+        });
+        if (updated) setChapter(updated);
+      }
+    }, [chapter, chapterId, firstImpression, currentAuthor]),
+  });
+
+  // Auto-save for last night thoughts
+  const { status: lastNightStatus, triggerSave: triggerLastNightSave } = useAutoSave({
+    delay: 1000,
+    onSave: useCallback(async () => {
+      if (!chapter || chapter.sealed || chapter.lastNightThoughts) return;
+      if (lastNightThoughts.trim()) {
+        const updated = await updateChapter(chapterId, {
+          lastNightThoughts: {
+            text: lastNightThoughts.trim(),
+            author: currentAuthor,
+            createdAt: new Date().toISOString(),
+          },
+        });
+        if (updated) setChapter(updated);
+      }
+    }, [chapter, chapterId, lastNightThoughts, currentAuthor]),
+  });
+
+  // Trigger auto-save when text changes (only after initial load)
+  useEffect(() => {
+    if (initialLoadedRef.current && reflection !== (chapter?.reflection || "")) {
+      triggerReflectionSave();
+    }
+  }, [reflection, chapter?.reflection, triggerReflectionSave]);
+
+  useEffect(() => {
+    if (initialLoadedRef.current && !chapter?.firstImpression && firstImpression.trim()) {
+      triggerFirstImpressionSave();
+    }
+  }, [firstImpression, chapter?.firstImpression, triggerFirstImpressionSave]);
+
+  useEffect(() => {
+    if (initialLoadedRef.current && !chapter?.lastNightThoughts && lastNightThoughts.trim()) {
+      triggerLastNightSave();
+    }
+  }, [lastNightThoughts, chapter?.lastNightThoughts, triggerLastNightSave]);
 
   // ============================================
   // HANDLERS
@@ -258,7 +333,7 @@ export default function ChapterPage() {
           </h1>
 
           {chapter.subtitle && (
-            <p className="font-body italic text-gold text-sm mb-2">{chapter.subtitle}</p>
+            <p className="font-body italic text-lavender text-sm mb-2">{chapter.subtitle}</p>
           )}
 
           {dateRange && (
@@ -289,14 +364,17 @@ export default function ChapterPage() {
         {/* FIRST IMPRESSION */}
         {/* ======================================== */}
         <section className="mb-8 animate-fade-in-delay-1">
-          <h3 className="font-display text-lg text-plum mb-2 text-center">🌅 First Impression</h3>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h3 className="font-display text-lg text-plum">🌅 First Impression</h3>
+            {!chapter.firstImpression && !isSealed && <AutoSaveIndicator status={firstImpressionStatus} />}
+          </div>
           <p className="text-xs text-midnight-soft text-center mb-3 italic">
             What struck you when you first arrived?
           </p>
           {chapter.firstImpression ? (
             <div className="book-card p-4">
               <p className="font-body text-midnight italic">&ldquo;{chapter.firstImpression.text}&rdquo;</p>
-              <p className="text-xs text-gold mt-2">
+              <p className="text-xs text-lavender mt-2">
                 — {chapter.firstImpression.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
               </p>
             </div>
@@ -305,17 +383,11 @@ export default function ChapterPage() {
               <textarea
                 value={firstImpression}
                 onChange={(e) => setFirstImpression(e.target.value)}
-                placeholder="Describe your first impression..."
+                placeholder="Describe your first impression... (auto-saves)"
                 className="textarea-field text-sm"
                 rows={3}
               />
-              <button
-                onClick={handleFirstImpressionSave}
-                disabled={!firstImpression.trim()}
-                className="btn-secondary text-sm disabled:opacity-50"
-              >
-                Save
-              </button>
+              <p className="text-xs text-midnight-soft italic text-center">Auto-saves as you type</p>
             </div>
           ) : (
             <p className="text-center text-midnight-soft italic text-sm">Not written</p>
@@ -337,7 +409,7 @@ export default function ChapterPage() {
                   px-3 py-2 rounded-full text-sm transition-all
                   ${activeTab === tab.id
                     ? "bg-plum text-parchment"
-                    : "bg-cream border border-parchment-dark text-midnight-soft hover:border-gold"
+                    : "bg-cream border border-parchment-dark text-midnight-soft hover:border-lavender"
                   }
                 `}
               >
@@ -466,14 +538,17 @@ export default function ChapterPage() {
         {/* LAST NIGHT THOUGHTS */}
         {/* ======================================== */}
         <section className="mb-8">
-          <h3 className="font-display text-lg text-plum mb-2 text-center">🌙 Last Night Thoughts</h3>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h3 className="font-display text-lg text-plum">🌙 Last Night Thoughts</h3>
+            {!chapter.lastNightThoughts && !isSealed && <AutoSaveIndicator status={lastNightStatus} />}
+          </div>
           <p className="text-xs text-midnight-soft text-center mb-3 italic">
             Before you leave, what do you want to remember?
           </p>
           {chapter.lastNightThoughts ? (
             <div className="book-card p-4">
               <p className="font-body text-midnight italic">&ldquo;{chapter.lastNightThoughts.text}&rdquo;</p>
-              <p className="text-xs text-gold mt-2">
+              <p className="text-xs text-lavender mt-2">
                 — {chapter.lastNightThoughts.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
               </p>
             </div>
@@ -482,17 +557,11 @@ export default function ChapterPage() {
               <textarea
                 value={lastNightThoughts}
                 onChange={(e) => setLastNightThoughts(e.target.value)}
-                placeholder="Your thoughts before leaving..."
+                placeholder="Your thoughts before leaving... (auto-saves)"
                 className="textarea-field text-sm"
                 rows={3}
               />
-              <button
-                onClick={handleLastNightSave}
-                disabled={!lastNightThoughts.trim()}
-                className="btn-secondary text-sm disabled:opacity-50"
-              >
-                Save
-              </button>
+              <p className="text-xs text-midnight-soft italic text-center">Auto-saves as you type</p>
             </div>
           ) : (
             <p className="text-center text-midnight-soft italic text-sm">Not written</p>
@@ -505,9 +574,10 @@ export default function ChapterPage() {
         {/* REFLECTION */}
         {/* ======================================== */}
         <section className="mb-10">
-          <h2 className="font-display text-xl text-plum mb-2 text-center">
-            Final Reflection
-          </h2>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <h2 className="font-display text-xl text-plum">Final Reflection</h2>
+            {!isSealed && <AutoSaveIndicator status={reflectionStatus} />}
+          </div>
           <p className="text-center font-body italic text-midnight-soft text-sm mb-4">
             {chapter.reflectionPrompt}
           </p>
@@ -529,17 +599,11 @@ export default function ChapterPage() {
               <textarea
                 value={reflection}
                 onChange={(e) => setReflection(e.target.value)}
-                placeholder="Take a moment to reflect..."
+                placeholder="Take a moment to reflect... (auto-saves)"
                 className="textarea-field"
                 rows={4}
               />
-              <button
-                onClick={handleReflectionSave}
-                disabled={reflection === (chapter.reflection || "")}
-                className="btn-secondary text-sm disabled:opacity-50"
-              >
-                Save reflection
-              </button>
+              <p className="text-xs text-midnight-soft italic text-center">Auto-saves as you type</p>
             </div>
           )}
         </section>
@@ -553,7 +617,7 @@ export default function ChapterPage() {
           <div>
             <button
               onClick={handleSealToggle}
-              className={`btn-primary ${isSealed ? "!bg-gold !text-midnight hover:!bg-gold-muted" : ""}`}
+              className={`btn-primary ${isSealed ? "!bg-lavender !text-midnight hover:!bg-lavender/80" : ""}`}
             >
               {isSealed ? "✧ Unseal this chapter" : "✧ Seal this chapter"}
             </button>
@@ -561,6 +625,19 @@ export default function ChapterPage() {
               {isSealed
                 ? "Unsealing allows you to edit again"
                 : "Sealing marks this chapter as complete"}
+            </p>
+          </div>
+
+          {/* Print/Export button */}
+          <div>
+            <Link
+              href={`/chapter/${chapterId}/print`}
+              className="btn-secondary inline-flex items-center gap-2"
+            >
+              🖨️ Print / Export PDF
+            </Link>
+            <p className="text-xs text-midnight-soft mt-2 italic">
+              Create a beautiful printable version of this chapter
             </p>
           </div>
 

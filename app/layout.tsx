@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Libre_Baskerville } from "next/font/google";
 import "./globals.css";
+import { BottomNav } from "@/components/BottomNav";
+import { DarkModeProvider } from "@/components/DarkModeProvider";
 
 const playfair = Playfair_Display({
   variable: "--font-display",
@@ -23,13 +25,20 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Two Souls",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#432946",
+  themeColor: "#4A2F6B",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -38,13 +47,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${playfair.variable} ${libreBaskerville.variable} antialiased`}
       >
-        <div className="min-h-screen paper-texture">
-          {children}
-        </div>
+        <DarkModeProvider>
+          <div className="min-h-screen paper-texture">
+            {children}
+          </div>
+          <BottomNav />
+        </DarkModeProvider>
       </body>
     </html>
   );

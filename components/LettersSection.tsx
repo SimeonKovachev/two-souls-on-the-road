@@ -134,7 +134,7 @@ export function LettersSection({
                 onClick={() => handleOpenLetter(letter)}
                 className={`
                   w-full book-card p-3 text-left transition-all hover:scale-[1.01]
-                  ${!letter.isRead ? "border-l-4 border-l-gold" : ""}
+                  ${!letter.isRead ? "border-l-4 border-l-lavender" : ""}
                 `}
               >
                 <div className="flex items-center justify-between">
@@ -142,7 +142,7 @@ export function LettersSection({
                     From {getAuthorInfo(letter.from).icon} {getAuthorInfo(letter.from).name}
                   </span>
                   {!letter.isRead && (
-                    <span className="text-xs bg-gold text-midnight px-2 py-0.5 rounded">
+                    <span className="text-xs bg-lavender text-midnight px-2 py-0.5 rounded">
                       New
                     </span>
                   )}
@@ -205,7 +205,7 @@ export function LettersSection({
               <p className="text-sm text-midnight-soft">
                 To {getAuthorInfo(readingLetter.to).icon} {getAuthorInfo(readingLetter.to).name}
               </p>
-              <p className="text-xs text-gold mt-1">
+              <p className="text-xs text-lavender mt-1">
                 {new Date(readingLetter.createdAt).toLocaleDateString()}
               </p>
             </div>

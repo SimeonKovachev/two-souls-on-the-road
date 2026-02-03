@@ -7,10 +7,11 @@ interface MomentCardProps {
   moment: Moment;
   onDelete?: () => void;
   onUpdate?: (text: string) => void;
+  onToggleFavorite?: () => void;
   disabled?: boolean;
 }
 
-export function MomentCard({ moment, onDelete, onUpdate, disabled = false }: MomentCardProps) {
+export function MomentCard({ moment, onDelete, onUpdate, onToggleFavorite, disabled = false }: MomentCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(moment.text);
 
@@ -79,28 +80,50 @@ export function MomentCard({ moment, onDelete, onUpdate, disabled = false }: Mom
       )}
 
       <div className="flex items-center justify-between mt-3 pt-2 border-t border-parchment-dark">
-        <span className="text-xs text-midnight-soft">
-          {formatTime(moment.createdAt)}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-midnight-soft">
+            {formatTime(moment.createdAt)}
+          </span>
+          {moment.author && (
+            <span className="text-xs bg-parchment-dark px-1.5 py-0.5 rounded">
+              {moment.author === "ива" ? "🌸" : "🌙"}
+            </span>
+          )}
+        </div>
 
-        {!disabled && (
-          <div className="flex gap-3">
+        <div className="flex items-center gap-3">
+          {/* Favorite star */}
+          {onToggleFavorite && (
             <button
-              onClick={() => setIsEditing(true)}
-              className="text-xs text-plum hover:text-plum-light transition-colors"
+              onClick={onToggleFavorite}
+              className={`text-lg transition-all hover:scale-110 ${
+                moment.isFavorite ? "text-yellow-500" : "text-silver-light hover:text-yellow-400"
+              }`}
+              title={moment.isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
-              Edit
+              {moment.isFavorite ? "★" : "☆"}
             </button>
-            {onDelete && (
+          )}
+
+          {!disabled && (
+            <>
               <button
-                onClick={onDelete}
-                className="text-xs text-red-700 hover:text-red-800 transition-colors"
+                onClick={() => setIsEditing(true)}
+                className="text-xs text-plum hover:text-plum-light transition-colors"
               >
-                Remove
+                Edit
               </button>
-            )}
-          </div>
-        )}
+              {onDelete && (
+                <button
+                  onClick={onDelete}
+                  className="text-xs text-red-700 hover:text-red-800 transition-colors"
+                >
+                  Remove
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -86,7 +86,7 @@ export function AddMomentForm({ onAdd, disabled = false }: AddMomentFormProps) {
         ) : (
           <label
             htmlFor="photo-upload"
-            className="flex items-center justify-center h-24 border-2 border-dashed border-parchment-dark rounded cursor-pointer hover:border-gold transition-colors"
+            className="flex items-center justify-center h-24 border-2 border-dashed border-parchment-dark rounded cursor-pointer hover:border-lavender transition-colors"
           >
             <span className="text-sm text-midnight-soft">
               {isUploading ? "Processing..." : "📷 Add a photo (optional)"}

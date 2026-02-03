@@ -26,7 +26,7 @@ export function AuthorSelector({ selected, onChange, label, disabled = false }: 
               border transition-all
               ${selected === author.id
                 ? "bg-plum text-parchment border-plum"
-                : "bg-cream border-parchment-dark text-midnight-soft hover:border-gold"
+                : "bg-cream border-parchment-dark text-midnight-soft hover:border-lavender"
               }
               ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
             `}

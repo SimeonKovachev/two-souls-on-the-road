@@ -25,17 +25,18 @@ export interface MoodOption {
   color: string;
 }
 
+// Witchy Purple/Silver color palette for moods
 export const MOOD_OPTIONS: MoodOption[] = [
-  { id: "calm", label: "Calm", icon: "🌊", tooltip: "Peaceful and serene", color: "#7BA3C9" },
-  { id: "warm", label: "Warm", icon: "🕯️", tooltip: "Cozy and tender", color: "#D4A574" },
-  { id: "inspired", label: "Inspired", icon: "✨", tooltip: "Creative and alive", color: "#E8B86D" },
-  { id: "free", label: "Free", icon: "🦋", tooltip: "Light and unbounded", color: "#9BC4CB" },
-  { id: "grounded", label: "Grounded", icon: "🌿", tooltip: "Rooted and present", color: "#8BA888" },
-  { id: "dreamy", label: "Dreamy", icon: "🌙", tooltip: "Soft and ethereal", color: "#A78BBA" },
-  { id: "adventurous", label: "Adventurous", icon: "🗺️", tooltip: "Bold and curious", color: "#C9896D" },
-  { id: "melancholic", label: "Melancholic", icon: "🍂", tooltip: "Beautifully bittersweet", color: "#9A8478" },
-  { id: "grateful", label: "Grateful", icon: "🙏", tooltip: "Full of appreciation", color: "#C9A962" },
-  { id: "playful", label: "Playful", icon: "🎈", tooltip: "Light-hearted joy", color: "#D4899A" },
+  { id: "calm", label: "Calm", icon: "🌊", tooltip: "Peaceful and serene", color: "#8B9DC3" },
+  { id: "warm", label: "Warm", icon: "🕯️", tooltip: "Cozy and tender", color: "#C4A4B5" },
+  { id: "inspired", label: "Inspired", icon: "✨", tooltip: "Creative and alive", color: "#B8A5D6" },
+  { id: "free", label: "Free", icon: "🦋", tooltip: "Light and unbounded", color: "#A8C5D9" },
+  { id: "grounded", label: "Grounded", icon: "🌿", tooltip: "Rooted and present", color: "#9EB5A8" },
+  { id: "dreamy", label: "Dreamy", icon: "🌙", tooltip: "Soft and ethereal", color: "#9D8EC2" },
+  { id: "adventurous", label: "Adventurous", icon: "🗺️", tooltip: "Bold and curious", color: "#7B6B8D" },
+  { id: "melancholic", label: "Melancholic", icon: "🍂", tooltip: "Beautifully bittersweet", color: "#8E7B94" },
+  { id: "grateful", label: "Grateful", icon: "🙏", tooltip: "Full of appreciation", color: "#A699C1" },
+  { id: "playful", label: "Playful", icon: "🎈", tooltip: "Light-hearted joy", color: "#C9A4C5" },
 ];
 
 // ============================================
@@ -136,6 +137,48 @@ export interface Moment {
   photoDataUrl?: string;
   author?: Author;
   createdAt: number;
+  isFavorite?: boolean; // NEW: Star/favorite moments
+}
+
+// ============================================
+// SPECIAL DATES & LOVE NOTES
+// ============================================
+
+export interface SpecialDate {
+  id: string;
+  date: string; // MM-DD format (repeats yearly) or YYYY-MM-DD for specific year
+  title: string;
+  message: string;
+  author: Author;
+  isSecret: boolean; // Only shown on the date itself
+}
+
+export interface AppSettings {
+  // Anniversary (for counter)
+  anniversaryDate?: string; // YYYY-MM-DD when you got together
+
+  // Dark mode
+  darkMode: boolean;
+
+  // Birthday (for special message)
+  ivaBirthday?: string; // MM-DD
+  meoBirthday?: string; // MM-DD
+
+  // First time setup done
+  welcomeShown: boolean;
+
+  // Special love notes (secret messages for special dates)
+  specialDates: SpecialDate[];
+}
+
+// ============================================
+// MAP LOCATIONS
+// ============================================
+
+export interface MapLocation {
+  lat: number;
+  lng: number;
+  name: string;
 }
 
 // ============================================
@@ -150,6 +193,7 @@ export interface Chapter {
   dateTo?: string;
   coverLine?: string;
   coverPhotoUrl?: string;
+  location?: MapLocation; // For map integration
 
   // Overall trip moods (summary)
   moods: Mood[];
@@ -270,8 +314,18 @@ export function getRandomReflectionPrompt(): string {
 // UTILITIES
 // ============================================
 
+// Generate a proper UUID v4 that matches Supabase's expected format
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  // Crypto API is available in both browser and Node.js
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older environments
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 }
 
 export function formatDate(dateString?: string): string {

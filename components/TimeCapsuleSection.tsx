@@ -59,7 +59,7 @@ export function TimeCapsuleSection({
         <h3 className="font-display text-lg text-plum flex items-center gap-2">
           ⏳ Time Capsules
           {readyToOpen.length > 0 && (
-            <span className="bg-gold text-midnight text-xs px-2 py-0.5 rounded-full animate-pulse">
+            <span className="bg-lavender text-midnight text-xs px-2 py-0.5 rounded-full animate-pulse">
               {readyToOpen.length} ready!
             </span>
           )}
@@ -151,7 +151,7 @@ export function TimeCapsuleSection({
                 key={capsule.id}
                 className={`
                   book-card p-4 transition-all
-                  ${canOpen ? "border-2 border-gold cursor-pointer hover:scale-[1.01]" : "opacity-70"}
+                  ${canOpen ? "border-2 border-lavender cursor-pointer hover:scale-[1.01]" : "opacity-70"}
                 `}
                 onClick={() => canOpen && handleTryOpen(capsule)}
               >
@@ -164,7 +164,7 @@ export function TimeCapsuleSection({
                   </div>
                   <div className="text-right">
                     {canOpen ? (
-                      <span className="text-gold font-display animate-pulse">
+                      <span className="text-lavender font-display animate-pulse">
                         ✨ Ready to open!
                       </span>
                     ) : (
@@ -172,7 +172,7 @@ export function TimeCapsuleSection({
                         <p className="text-sm text-midnight-soft">
                           🔒 {formatDate(capsule.unlockDate)}
                         </p>
-                        <p className="text-xs text-gold">
+                        <p className="text-xs text-lavender">
                           {daysUntil} day{daysUntil !== 1 ? "s" : ""} left
                         </p>
                       </>
@@ -202,7 +202,7 @@ export function TimeCapsuleSection({
                     Opened {capsule.unlockedAt ? formatDate(capsule.unlockedAt) : ""}
                   </p>
                 </div>
-                <span className="text-gold">✨</span>
+                <span className="text-lavender">✨</span>
               </div>
             </button>
           ))}
@@ -232,7 +232,7 @@ export function TimeCapsuleSection({
               <p className="text-xs text-midnight-soft mt-1">
                 Created by {getAuthorInfo(viewingCapsule.author).icon} {getAuthorInfo(viewingCapsule.author).name}
               </p>
-              <p className="text-xs text-gold">
+              <p className="text-xs text-lavender">
                 {formatDate(viewingCapsule.createdAt)}
               </p>
             </div>

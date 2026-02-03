@@ -17,6 +17,7 @@ create table chapters (
   date_to date,
   cover_line text,
   cover_photo_url text,
+  location jsonb, -- Map location: {lat, lng, name}
   moods text[] default '{}',
   reflection text,
   reflection_prompt text not null,

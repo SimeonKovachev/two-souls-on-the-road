@@ -1,30 +1,47 @@
 @import "tailwindcss";
 
-/* Night Library Color Palette */
+/* ============================================
+   WITCHY NIGHT LIBRARY - Purple & Silver Theme
+   ============================================ */
+
 :root {
-  --parchment: #FAF6F1;
-  --parchment-dark: #F0EBE3;
-  --plum: #432946;
-  --plum-light: #5a3d5c;
-  --gold: #C9A962;
-  --gold-muted: #B89B4F;
-  --midnight: #1A1821;
-  --midnight-soft: #2a2630;
-  --cream: #FFF8F0;
-  --shadow: rgba(26, 24, 33, 0.1);
+  /* Backgrounds */
+  --parchment: #F8F6FA;
+  --parchment-dark: #EDE8F2;
+  --cream: #FDFBFF;
+
+  /* Primary - Deep Purple */
+  --plum: #4A2F6B;
+  --plum-light: #6B4A8C;
+  --plum-dark: #2D1B42;
+
+  /* Accent - Mystical Silver/Lavender */
+  --silver: #B8B5C9;
+  --silver-light: #D4D1E3;
+  --lavender: #9D8EC2;
+  --moonlight: #E8E4F5;
+
+  /* Text */
+  --midnight: #1A1622;
+  --midnight-soft: #3D3650;
+
+  /* Effects */
+  --shadow: rgba(45, 27, 66, 0.1);
+  --glow: rgba(157, 142, 194, 0.3);
 }
 
 /* Custom Tailwind Theme Extension */
 @theme {
-  --color-parchment: #FAF6F1;
-  --color-parchment-dark: #F0EBE3;
-  --color-plum: #432946;
-  --color-plum-light: #5a3d5c;
-  --color-gold: #C9A962;
-  --color-gold-muted: #B89B4F;
-  --color-midnight: #1A1821;
-  --color-midnight-soft: #2a2630;
-  --color-cream: #FFF8F0;
+  --color-parchment: #F8F6FA;
+  --color-parchment-dark: #EDE8F2;
+  --color-plum: #4A2F6B;
+  --color-plum-light: #6B4A8C;
+  --color-silver: #B8B5C9;
+  --color-lavender: #9D8EC2;
+  --color-moonlight: #E8E4F5;
+  --color-midnight: #1A1622;
+  --color-midnight-soft: #3D3650;
+  --color-cream: #FDFBFF;
 
   --font-family-display: 'Playfair Display', serif;
   --font-family-body: 'Libre Baskerville', serif;
@@ -33,21 +50,25 @@
 /* Base Styles */
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   font-family: var(--font-family-body);
-  background-color: var(--parchment);
+  background: linear-gradient(180deg, var(--parchment) 0%, var(--moonlight) 100%);
+  background-attachment: fixed;
   color: var(--midnight);
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
   line-height: 1.7;
 }
 
-/* Paper Texture Overlay */
+/* Paper Texture Overlay with subtle purple tint */
 .paper-texture {
   position: relative;
 }
@@ -60,7 +81,7 @@ body {
   right: 0;
   bottom: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.03;
+  opacity: 0.02;
   pointer-events: none;
   z-index: 0;
 }
@@ -77,27 +98,28 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
 }
 
-/* Book-like Card Styling */
+/* Book-like Card Styling - Witchy Version */
 .book-card {
   background: linear-gradient(135deg, var(--cream) 0%, var(--parchment) 100%);
-  border: 1px solid var(--parchment-dark);
+  border: 1px solid var(--silver-light);
   box-shadow:
     0 1px 3px var(--shadow),
-    0 4px 12px rgba(67, 41, 70, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  border-radius: 4px;
+    0 4px 12px rgba(74, 47, 107, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .book-card:hover {
   box-shadow:
     0 2px 8px var(--shadow),
-    0 8px 24px rgba(67, 41, 70, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 8px 24px rgba(74, 47, 107, 0.1),
+    0 0 20px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
 }
 
-/* Spine Effect for Book Cards */
+/* Spine Effect - Purple/Silver gradient */
 .book-spine {
   position: relative;
 }
@@ -109,66 +131,76 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   bottom: 0;
   width: 4px;
-  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-muted) 100%);
-  border-radius: 4px 0 0 4px;
+  background: linear-gradient(180deg, var(--lavender) 0%, var(--plum) 50%, var(--lavender) 100%);
+  border-radius: 8px 0 0 8px;
 }
 
-/* Buttons */
+/* Primary Button - Deep Purple with glow */
 .btn-primary {
   background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
-  color: var(--parchment);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  color: var(--cream);
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
   font-family: var(--font-family-display);
-  font-size: 0.95rem;
+  font-size: 1rem;
   letter-spacing: 0.02em;
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(67, 41, 70, 0.2);
+  box-shadow: 0 2px 8px rgba(74, 47, 107, 0.25);
+  min-height: 48px; /* Touch-friendly */
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--plum-light) 0%, var(--plum) 100%);
-  box-shadow: 0 4px 16px rgba(67, 41, 70, 0.3);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(74, 47, 107, 0.35), 0 0 30px var(--glow);
+  transform: translateY(-2px);
 }
 
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary Button */
 .btn-secondary {
   background: transparent;
   color: var(--plum);
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
+  padding: 0.875rem 1.75rem;
+  border-radius: 8px;
   font-family: var(--font-family-display);
-  font-size: 0.95rem;
+  font-size: 1rem;
   letter-spacing: 0.02em;
   transition: all 0.3s ease;
-  border: 1px solid var(--plum);
+  border: 1px solid var(--lavender);
   cursor: pointer;
+  min-height: 48px; /* Touch-friendly */
 }
 
 .btn-secondary:hover {
   background: var(--plum);
-  color: var(--parchment);
+  color: var(--cream);
+  border-color: var(--plum);
+  box-shadow: 0 0 20px var(--glow);
 }
 
-/* Form Inputs */
+/* Form Inputs - Witchy style */
 .input-field {
   background: var(--cream);
-  border: 1px solid var(--parchment-dark);
-  border-radius: 4px;
-  padding: 0.75rem 1rem;
+  border: 1px solid var(--silver-light);
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
   font-family: var(--font-family-body);
-  font-size: 1rem;
+  font-size: 16px; /* Prevents zoom on iOS */
   color: var(--midnight);
   transition: all 0.2s ease;
   width: 100%;
+  min-height: 48px; /* Touch-friendly */
 }
 
 .input-field:focus {
   outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+  border-color: var(--lavender);
+  box-shadow: 0 0 0 3px var(--glow);
 }
 
 .input-field::placeholder {
@@ -180,11 +212,11 @@ h1, h2, h3, h4, h5, h6 {
 /* Textarea */
 .textarea-field {
   background: var(--cream);
-  border: 1px solid var(--parchment-dark);
-  border-radius: 4px;
+  border: 1px solid var(--silver-light);
+  border-radius: 8px;
   padding: 1rem;
   font-family: var(--font-family-body);
-  font-size: 1rem;
+  font-size: 16px; /* Prevents zoom on iOS */
   color: var(--midnight);
   transition: all 0.2s ease;
   width: 100%;
@@ -195,20 +227,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .textarea-field:focus {
   outline: none;
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
-}
-
-/* Page Transitions */
-.page-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.page-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  border-color: var(--lavender);
+  box-shadow: 0 0 0 3px var(--glow);
 }
 
 /* Subtle Animations */
@@ -220,6 +240,15 @@ h1, h2, h3, h4, h5, h6 {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--glow);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--glow), 0 0 30px var(--glow);
   }
 }
 
@@ -251,25 +280,27 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0;
 }
 
-/* Gold accent line */
+/* Silver/Lavender accent line - renamed from gold-line */
+.mystic-line,
 .gold-line {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--lavender) 50%, transparent 100%);
 }
 
-/* Sealed badge */
+/* Sealed badge - Mystical purple */
 .sealed-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-muted) 100%);
-  color: var(--midnight);
+  padding: 0.375rem 1rem;
+  background: linear-gradient(135deg, var(--lavender) 0%, var(--plum-light) 100%);
+  color: var(--cream);
   font-family: var(--font-family-display);
   font-size: 0.75rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  border-radius: 2px;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px var(--glow);
 }
 
 /* Mood Pills */
@@ -277,62 +308,249 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1rem;
   background: var(--cream);
-  border: 1px solid var(--parchment-dark);
-  border-radius: 20px;
+  border: 1px solid var(--silver-light);
+  border-radius: 24px;
   font-family: var(--font-family-body);
   font-size: 0.875rem;
   color: var(--midnight-soft);
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 44px; /* Touch-friendly */
 }
 
 .mood-pill:hover {
-  border-color: var(--gold);
+  border-color: var(--lavender);
   color: var(--midnight);
+  box-shadow: 0 0 10px var(--glow);
 }
 
 .mood-pill.active {
-  background: var(--plum);
+  background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
   border-color: var(--plum);
-  color: var(--parchment);
+  color: var(--cream);
+  box-shadow: 0 2px 10px rgba(74, 47, 107, 0.3);
 }
 
-/* Decorative Elements */
+/* Decorative Elements - Silver stars */
 .ornament {
-  color: var(--gold);
+  color: var(--lavender);
   font-size: 1.25rem;
   letter-spacing: 0.5rem;
+  text-shadow: 0 0 10px var(--glow);
 }
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--parchment-dark);
+  background: var(--moonlight);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--plum);
-  border-radius: 4px;
+  background: var(--lavender);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--plum-light);
 }
 
-/* Mobile adjustments */
-@media (max-width: 640px) {
+/* Auto-save indicator */
+.auto-save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--lavender);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.auto-save-indicator.saving {
+  opacity: 1;
+}
+
+.auto-save-indicator.saved {
+  opacity: 1;
+  color: var(--plum-light);
+}
+
+/* ============================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   ============================================ */
+
+/* Base mobile styles (default) */
+body {
+  font-size: 1rem;
+  padding-bottom: env(safe-area-inset-bottom); /* iPhone notch */
+}
+
+/* Touch-friendly spacing */
+button,
+.btn-primary,
+.btn-secondary,
+.mood-pill,
+input,
+textarea,
+select {
+  touch-action: manipulation;
+}
+
+/* Prevent text selection on buttons */
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Mobile: Smaller screens */
+@media (max-width: 480px) {
   body {
     font-size: 0.95rem;
   }
 
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+  }
+
   .btn-primary,
   .btn-secondary {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.9rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  .book-card {
+    border-radius: 12px;
+  }
+
+  .mood-pill {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablet and up */
+@media (min-width: 640px) {
+  body {
+    font-size: 1rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: auto;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  body {
+    font-size: 1.05rem;
+  }
+}
+
+/* Landscape phone */
+@media (max-height: 500px) and (orientation: landscape) {
+  .paper-texture {
+    min-height: 100vh;
+  }
+}
+
+/* ============================================
+   DARK MODE - Witchy Night Theme
+   ============================================ */
+
+html.dark {
+  --parchment: #1A1622;
+  --parchment-dark: #13101A;
+  --cream: #1E1A26;
+
+  --plum: #9D8EC2;
+  --plum-light: #B8A5D6;
+  --plum-dark: #6B4A8C;
+
+  --silver: #4A4358;
+  --silver-light: #5A5368;
+  --lavender: #9D8EC2;
+  --moonlight: #2D2835;
+
+  --midnight: #E8E4F5;
+  --midnight-soft: #B8B5C9;
+
+  --shadow: rgba(0, 0, 0, 0.3);
+  --glow: rgba(157, 142, 194, 0.4);
+}
+
+html.dark body {
+  background: linear-gradient(180deg, var(--parchment) 0%, #0D0A12 100%);
+}
+
+html.dark .book-card {
+  background: linear-gradient(135deg, var(--cream) 0%, var(--parchment) 100%);
+  border-color: var(--silver);
+}
+
+html.dark .input-field,
+html.dark .textarea-field {
+  background: var(--parchment-dark);
+  border-color: var(--silver);
+  color: var(--midnight);
+}
+
+html.dark .input-field::placeholder,
+html.dark .textarea-field::placeholder {
+  color: var(--midnight-soft);
+}
+
+html.dark .btn-secondary {
+  border-color: var(--lavender);
+  color: var(--lavender);
+}
+
+html.dark .btn-secondary:hover {
+  background: var(--plum);
+  color: var(--parchment);
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: var(--parchment-dark);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--silver);
+}
+
+/* Safe area for bottom navigation */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .book-card {
+    border-width: 2px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    border-width: 2px;
   }
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { DayEntry, Mood, Author, formatDateShort, MOOD_OPTIONS, getRandomDailyPrompts } from "@/lib/types";
 import { AuthorSelector, AuthorBadge } from "./AuthorSelector";
 import { GoldLine } from "./Ornament";
+import { useAutoSave, AutoSaveIndicator } from "@/lib/useAutoSave";
 
 interface DayEntryCardProps {
   entry: DayEntry;
@@ -33,25 +34,57 @@ export function DayEntryCard({
   const [wordText, setWordText] = useState(entry.wordOfTheDay || "");
   const [promptAnswers, setPromptAnswers] = useState<Record<string, string>>({});
 
-  // Get some prompts for this day (use 3 random ones if none answered yet)
-  const availablePrompts = entry.prompts.length > 0
-    ? entry.prompts.map(p => p.question)
-    : getRandomDailyPrompts(3);
+  // Keep prompts consistent for this entry (memoize based on entry.id)
+  const [availablePrompts] = useState(() =>
+    entry.prompts.length > 0
+      ? entry.prompts.map(p => p.question)
+      : getRandomDailyPrompts(3)
+  );
+
+  // Auto-save for gratitude
+  const { status: gratitudeStatus, triggerSave: triggerGratitudeSave } = useAutoSave({
+    delay: 800,
+    onSave: useCallback(() => {
+      if (gratitudeText.trim() && gratitudeText !== entry.gratitude) {
+        onUpdateGratitude(gratitudeText.trim(), currentAuthor);
+      }
+    }, [gratitudeText, entry.gratitude, currentAuthor, onUpdateGratitude]),
+  });
+
+  // Auto-save for word of the day
+  const { status: wordStatus, triggerSave: triggerWordSave } = useAutoSave({
+    delay: 800,
+    onSave: useCallback(() => {
+      if (wordText.trim() && wordText !== entry.wordOfTheDay) {
+        onUpdateWordOfDay(wordText.trim());
+      }
+    }, [wordText, entry.wordOfTheDay, onUpdateWordOfDay]),
+  });
+
+  // Trigger auto-save when gratitude text changes
+  useEffect(() => {
+    if (gratitudeText && gratitudeText !== entry.gratitude) {
+      triggerGratitudeSave();
+    }
+  }, [gratitudeText, entry.gratitude, triggerGratitudeSave]);
+
+  // Trigger auto-save when word text changes
+  useEffect(() => {
+    if (wordText && wordText !== entry.wordOfTheDay) {
+      triggerWordSave();
+    }
+  }, [wordText, entry.wordOfTheDay, triggerWordSave]);
+
+  // Sync with props when entry changes
+  useEffect(() => {
+    setGratitudeText(entry.gratitude || "");
+    setWordText(entry.wordOfTheDay || "");
+  }, [entry.gratitude, entry.wordOfTheDay]);
 
   const handleAddThought = () => {
     if (!thoughtText.trim()) return;
     onAddThought(thoughtText.trim(), currentAuthor);
     setThoughtText("");
-  };
-
-  const handleSaveGratitude = () => {
-    if (!gratitudeText.trim()) return;
-    onUpdateGratitude(gratitudeText.trim(), currentAuthor);
-  };
-
-  const handleSaveWord = () => {
-    if (!wordText.trim()) return;
-    onUpdateWordOfDay(wordText.trim());
   };
 
   const handleAnswerPrompt = (question: string) => {
@@ -61,18 +94,23 @@ export function DayEntryCard({
     setPromptAnswers((prev) => ({ ...prev, [question]: "" }));
   };
 
+  // Mood selection auto-saves immediately
+  const handleMoodSelect = (type: "morning" | "evening", mood: Mood) => {
+    onUpdateMood(type, mood);
+  };
+
   return (
     <div className="book-card book-spine overflow-hidden">
       {/* Header - always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 pl-6 flex items-center justify-between text-left hover:bg-parchment-dark/30 transition-colors"
+        className="w-full p-4 pl-6 flex items-center justify-between text-left hover:bg-moonlight/50 transition-colors active:bg-moonlight"
       >
         <div>
           <h3 className="font-display text-lg text-plum">
             {formatDateShort(entry.date)}
           </h3>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex flex-wrap items-center gap-2 mt-1">
             {entry.morningMood && (
               <span className="text-sm" title="Morning mood">
                 ☀️ {MOOD_OPTIONS.find(m => m.id === entry.morningMood)?.icon}
@@ -95,7 +133,7 @@ export function DayEntryCard({
             )}
           </div>
         </div>
-        <span className="text-gold text-xl">
+        <span className="text-lavender text-xl font-light">
           {isExpanded ? "−" : "+"}
         </span>
       </button>
@@ -115,20 +153,20 @@ export function DayEntryCard({
             />
           )}
 
-          {/* Morning & Evening Mood */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Morning & Evening Mood - Auto-saves on selection */}
+          <div className="grid grid-cols-2 gap-3">
             <MoodSelector
               label="Morning"
               icon="☀️"
               selected={entry.morningMood}
-              onSelect={(mood) => onUpdateMood("morning", mood)}
+              onSelect={(mood) => handleMoodSelect("morning", mood)}
               disabled={disabled}
             />
             <MoodSelector
               label="Evening"
               icon="🌙"
               selected={entry.eveningMood}
-              onSelect={(mood) => onUpdateMood("evening", mood)}
+              onSelect={(mood) => handleMoodSelect("evening", mood)}
               disabled={disabled}
             />
           </div>
@@ -143,15 +181,17 @@ export function DayEntryCard({
                     <img
                       src={photo.url}
                       alt={photo.caption || "Memory"}
-                      className="w-full h-32 object-cover rounded"
+                      className="w-full h-32 object-cover rounded-lg"
                     />
-                    <AuthorBadge author={photo.author} size="sm" />
+                    <div className="absolute bottom-1 left-1">
+                      <AuthorBadge author={photo.author} size="sm" />
+                    </div>
                   </div>
                 ))}
               </div>
             )}
             {!disabled && (
-              <label className="flex items-center justify-center h-20 border-2 border-dashed border-parchment-dark rounded cursor-pointer hover:border-gold transition-colors">
+              <label className="flex items-center justify-center h-20 border-2 border-dashed border-silver-light rounded-lg cursor-pointer hover:border-lavender hover:bg-moonlight/30 transition-all active:bg-moonlight/50">
                 <span className="text-sm text-midnight-soft">📷 Add a photo</span>
                 <input
                   type="file"
@@ -160,21 +200,22 @@ export function DayEntryCard({
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) onAddPhoto(file, currentAuthor);
+                    e.target.value = ""; // Reset for same file
                   }}
                 />
               </label>
             )}
           </div>
 
-          {/* Thoughts */}
+          {/* Thoughts - Saves on Enter or button click */}
           <div>
             <h4 className="font-display text-sm text-plum mb-2">Quick thoughts</h4>
             {entry.thoughts.length > 0 && (
               <div className="space-y-2 mb-3">
                 {entry.thoughts.map((thought) => (
-                  <div key={thought.id} className="bg-cream p-3 rounded">
+                  <div key={thought.id} className="bg-moonlight/50 p-3 rounded-lg">
                     <p className="text-sm text-midnight italic">&ldquo;{thought.text}&rdquo;</p>
-                    <div className="flex justify-between items-center mt-1">
+                    <div className="flex justify-between items-center mt-2">
                       <AuthorBadge author={thought.author} size="sm" />
                       <span className="text-xs text-midnight-soft">
                         {new Date(thought.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -191,13 +232,13 @@ export function DayEntryCard({
                   value={thoughtText}
                   onChange={(e) => setThoughtText(e.target.value)}
                   placeholder="A fleeting thought..."
-                  className="input-field flex-1 text-sm"
+                  className="input-field flex-1"
                   onKeyDown={(e) => e.key === "Enter" && handleAddThought()}
                 />
                 <button
                   onClick={handleAddThought}
                   disabled={!thoughtText.trim()}
-                  className="btn-primary text-sm px-3 disabled:opacity-50"
+                  className="btn-primary px-4 disabled:opacity-50"
                 >
                   +
                 </button>
@@ -205,19 +246,21 @@ export function DayEntryCard({
             )}
           </div>
 
-          {/* Journal Prompts */}
+          {/* Journal Prompts - Saves on button click */}
           <div>
             <h4 className="font-display text-sm text-plum mb-2">Today&apos;s prompts</h4>
             <div className="space-y-3">
               {availablePrompts.map((question, idx) => {
                 const answered = entry.prompts.find((p) => p.question === question);
                 return (
-                  <div key={idx} className="bg-cream p-3 rounded">
+                  <div key={idx} className="bg-moonlight/50 p-3 rounded-lg">
                     <p className="text-sm text-midnight-soft italic mb-2">{question}</p>
                     {answered ? (
                       <div>
                         <p className="text-sm text-midnight">&ldquo;{answered.answer}&rdquo;</p>
-                        <AuthorBadge author={answered.author} size="sm" />
+                        <div className="mt-1">
+                          <AuthorBadge author={answered.author} size="sm" />
+                        </div>
                       </div>
                     ) : !disabled ? (
                       <div className="flex gap-2">
@@ -226,12 +269,13 @@ export function DayEntryCard({
                           value={promptAnswers[question] || ""}
                           onChange={(e) => setPromptAnswers((prev) => ({ ...prev, [question]: e.target.value }))}
                           placeholder="Your answer..."
-                          className="input-field flex-1 text-sm"
+                          className="input-field flex-1"
+                          onKeyDown={(e) => e.key === "Enter" && handleAnswerPrompt(question)}
                         />
                         <button
                           onClick={() => handleAnswerPrompt(question)}
                           disabled={!promptAnswers[question]?.trim()}
-                          className="btn-secondary text-xs px-2 disabled:opacity-50"
+                          className="btn-secondary px-3 disabled:opacity-50"
                         >
                           Save
                         </button>
@@ -245,61 +289,58 @@ export function DayEntryCard({
             </div>
           </div>
 
-          {/* Gratitude */}
+          {/* Gratitude - AUTO-SAVES as you type */}
           <div>
-            <h4 className="font-display text-sm text-plum mb-2">🙏 Gratitude</h4>
-            {entry.gratitude ? (
-              <div className="bg-cream p-3 rounded">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-display text-sm text-plum">🙏 Gratitude</h4>
+              <AutoSaveIndicator status={gratitudeStatus} />
+            </div>
+            {entry.gratitude && !gratitudeText ? (
+              <div className="bg-moonlight/50 p-3 rounded-lg">
                 <p className="text-sm text-midnight italic">&ldquo;{entry.gratitude}&rdquo;</p>
                 {entry.gratitudeAuthor && <AuthorBadge author={entry.gratitudeAuthor} size="sm" />}
               </div>
             ) : !disabled ? (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={gratitudeText}
-                  onChange={(e) => setGratitudeText(e.target.value)}
-                  placeholder="What are you grateful for today?"
-                  className="input-field flex-1 text-sm"
-                />
-                <button
-                  onClick={handleSaveGratitude}
-                  disabled={!gratitudeText.trim()}
-                  className="btn-secondary text-xs px-2 disabled:opacity-50"
-                >
-                  Save
-                </button>
+              <input
+                type="text"
+                value={gratitudeText}
+                onChange={(e) => setGratitudeText(e.target.value)}
+                placeholder="What are you grateful for today?"
+                className="input-field"
+              />
+            ) : entry.gratitude ? (
+              <div className="bg-moonlight/50 p-3 rounded-lg">
+                <p className="text-sm text-midnight italic">&ldquo;{entry.gratitude}&rdquo;</p>
+                {entry.gratitudeAuthor && <AuthorBadge author={entry.gratitudeAuthor} size="sm" />}
               </div>
             ) : (
               <p className="text-xs text-midnight-soft italic">Not filled</p>
             )}
           </div>
 
-          {/* Word of the day */}
+          {/* Word of the day - AUTO-SAVES as you type */}
           <div>
-            <h4 className="font-display text-sm text-plum mb-2">✨ One word for today</h4>
-            {entry.wordOfTheDay ? (
-              <p className="font-display text-2xl text-gold text-center py-2">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-display text-sm text-plum">✨ One word for today</h4>
+              <AutoSaveIndicator status={wordStatus} />
+            </div>
+            {entry.wordOfTheDay && !wordText ? (
+              <p className="font-display text-2xl text-lavender text-center py-2">
                 {entry.wordOfTheDay}
               </p>
             ) : !disabled ? (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={wordText}
-                  onChange={(e) => setWordText(e.target.value)}
-                  placeholder="One word..."
-                  className="input-field flex-1 text-sm text-center"
-                  maxLength={30}
-                />
-                <button
-                  onClick={handleSaveWord}
-                  disabled={!wordText.trim()}
-                  className="btn-secondary text-xs px-2 disabled:opacity-50"
-                >
-                  Save
-                </button>
-              </div>
+              <input
+                type="text"
+                value={wordText}
+                onChange={(e) => setWordText(e.target.value)}
+                placeholder="One word..."
+                className="input-field text-center"
+                maxLength={30}
+              />
+            ) : entry.wordOfTheDay ? (
+              <p className="font-display text-2xl text-lavender text-center py-2">
+                {entry.wordOfTheDay}
+              </p>
             ) : (
               <p className="text-xs text-midnight-soft italic text-center">Not chosen</p>
             )}
@@ -328,9 +369,9 @@ function MoodSelector({ label, icon, selected, onSelect, disabled }: MoodSelecto
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          w-full p-3 rounded border text-center transition-colors
-          ${selected ? "bg-cream border-gold" : "bg-parchment-dark/30 border-parchment-dark"}
-          ${disabled ? "opacity-60 cursor-not-allowed" : "hover:border-gold cursor-pointer"}
+          w-full p-3 rounded-lg border text-center transition-all
+          ${selected ? "bg-moonlight border-lavender" : "bg-cream border-silver-light"}
+          ${disabled ? "opacity-60 cursor-not-allowed" : "hover:border-lavender active:bg-moonlight cursor-pointer"}
         `}
       >
         <span className="text-sm text-midnight-soft">{icon} {label}</span>
@@ -342,24 +383,31 @@ function MoodSelector({ label, icon, selected, onSelect, disabled }: MoodSelecto
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-cream border border-parchment-dark rounded shadow-lg z-10 p-2 grid grid-cols-5 gap-1">
-          {MOOD_OPTIONS.map((mood) => (
-            <button
-              key={mood.id}
-              onClick={() => {
-                onSelect(mood.id);
-                setIsOpen(false);
-              }}
-              title={mood.tooltip}
-              className={`
-                p-2 rounded text-xl hover:bg-parchment-dark transition-colors
-                ${selected === mood.id ? "bg-gold/20" : ""}
-              `}
-            >
-              {mood.icon}
-            </button>
-          ))}
-        </div>
+        <>
+          {/* Backdrop to close on tap outside */}
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute top-full left-0 right-0 mt-1 bg-cream border border-silver-light rounded-lg shadow-lg z-20 p-2 grid grid-cols-5 gap-1">
+            {MOOD_OPTIONS.map((mood) => (
+              <button
+                key={mood.id}
+                onClick={() => {
+                  onSelect(mood.id);
+                  setIsOpen(false);
+                }}
+                title={mood.tooltip}
+                className={`
+                  p-2 rounded-lg text-xl hover:bg-moonlight transition-colors active:scale-95
+                  ${selected === mood.id ? "bg-lavender/30" : ""}
+                `}
+              >
+                {mood.icon}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

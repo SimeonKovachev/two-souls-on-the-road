@@ -10,6 +10,7 @@ import {
   Moment,
   Author,
   Mood,
+  MapLocation,
   generateId,
   getRandomReflectionPrompt,
   getRandomDailyPrompts,
@@ -152,7 +153,8 @@ export async function createChapter(
   destination: string,
   dateFrom?: string,
   dateTo?: string,
-  coverLine?: string
+  coverLine?: string,
+  location?: MapLocation
 ): Promise<Chapter> {
   const now = new Date().toISOString();
   const reflectionPrompt = getRandomReflectionPrompt();
@@ -166,6 +168,7 @@ export async function createChapter(
           date_from: dateFrom || null,
           date_to: dateTo || null,
           cover_line: coverLine || null,
+          location: location || null,
           moods: [],
           reflection_prompt: reflectionPrompt,
           sealed: false,
@@ -187,14 +190,15 @@ export async function createChapter(
   }
 
   // Fallback to localStorage
-  return createChapterLocal(destination, dateFrom, dateTo, coverLine);
+  return createChapterLocal(destination, dateFrom, dateTo, coverLine, location);
 }
 
 export function createChapterLocal(
   destination: string,
   dateFrom?: string,
   dateTo?: string,
-  coverLine?: string
+  coverLine?: string,
+  location?: MapLocation
 ): Chapter {
   const now = new Date().toISOString();
   const chapter: Chapter = {
@@ -203,6 +207,7 @@ export function createChapterLocal(
     dateFrom,
     dateTo,
     coverLine,
+    location,
     moods: [],
     moments: [],
     dayEntries: [],
@@ -1000,6 +1005,7 @@ function transformChapterFromDB(data: Record<string, unknown>): Chapter {
     dateTo: data.date_to as string | undefined,
     coverLine: data.cover_line as string | undefined,
     coverPhotoUrl: data.cover_photo_url as string | undefined,
+    location: data.location as MapLocation | undefined,
     moods: (data.moods as Mood[]) || [],
     moments: [],
     dayEntries: [],
@@ -1091,6 +1097,7 @@ function transformMomentFromDB(data: Record<string, unknown>): Moment {
     photoDataUrl: data.photo_data_url as string | undefined,
     author: data.author as Author | undefined,
     createdAt: new Date(data.created_at as string).getTime(),
+    isFavorite: data.is_favorite as boolean | undefined,
   };
 }
 

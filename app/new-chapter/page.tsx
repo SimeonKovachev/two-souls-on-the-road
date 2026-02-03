@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { MapLocation } from "@/lib/types";
 import { createChapter } from "@/lib/storage";
 import { Ornament, PageDivider } from "@/components/Ornament";
+import { LocationPicker } from "@/components/TravelMap";
+import { BottomNavSpacer } from "@/components/BottomNav";
 
 export default function NewChapterPage() {
   const router = useRouter();
@@ -12,6 +15,7 @@ export default function NewChapterPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [coverLine, setCoverLine] = useState("");
+  const [location, setLocation] = useState<MapLocation | undefined>();
   const [isCreating, setIsCreating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +29,8 @@ export default function NewChapterPage() {
         destination.trim(),
         dateFrom || undefined,
         dateTo || undefined,
-        coverLine.trim() || undefined
+        coverLine.trim() || undefined,
+        location
       );
 
       // Navigate to the new chapter
@@ -48,7 +53,7 @@ export default function NewChapterPage() {
   const dayCount = getDayCount();
 
   return (
-    <main className="min-h-screen px-4 py-8 md:py-12">
+    <main className="min-h-screen px-4 py-8 pb-24 md:py-12 md:pb-12">
       <div className="max-w-lg mx-auto">
         {/* Back link */}
         <Link
@@ -90,6 +95,18 @@ export default function NewChapterPage() {
             />
           </div>
 
+          {/* Location picker */}
+          <div>
+            <label className="block font-display text-sm text-plum mb-2">
+              📍 Map Location
+              <span className="font-body text-midnight-soft italic ml-2">(optional)</span>
+            </label>
+            <LocationPicker value={location} onChange={setLocation} />
+            <p className="text-xs text-midnight-soft mt-1 italic">
+              Add to see this place on your travel map
+            </p>
+          </div>
+
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -121,7 +138,7 @@ export default function NewChapterPage() {
 
           {/* Day count info */}
           {dayCount && (
-            <p className="text-center text-sm text-gold animate-fade-in">
+            <p className="text-center text-sm text-lavender animate-fade-in">
               ✨ {dayCount} day{dayCount !== 1 ? "s" : ""} of adventure — you&apos;ll get a daily journal for each!
             </p>
           )}
@@ -165,6 +182,7 @@ export default function NewChapterPage() {
             <li>💌 Private letters to each other</li>
             <li>⏳ Time capsules to unlock in the future</li>
             <li>🌙 Mood visualization & constellation</li>
+            <li>🗺️ Map location tracking</li>
             <li>✨ Moments, photos, and reflections</li>
           </ul>
         </div>
@@ -174,6 +192,8 @@ export default function NewChapterPage() {
           <Ornament />
         </footer>
       </div>
+
+      <BottomNavSpacer />
     </main>
   );
 }
