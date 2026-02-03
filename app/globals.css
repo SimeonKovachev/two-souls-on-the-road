@@ -1,0 +1,338 @@
+@import "tailwindcss";
+
+/* Night Library Color Palette */
+:root {
+  --parchment: #FAF6F1;
+  --parchment-dark: #F0EBE3;
+  --plum: #432946;
+  --plum-light: #5a3d5c;
+  --gold: #C9A962;
+  --gold-muted: #B89B4F;
+  --midnight: #1A1821;
+  --midnight-soft: #2a2630;
+  --cream: #FFF8F0;
+  --shadow: rgba(26, 24, 33, 0.1);
+}
+
+/* Custom Tailwind Theme Extension */
+@theme {
+  --color-parchment: #FAF6F1;
+  --color-parchment-dark: #F0EBE3;
+  --color-plum: #432946;
+  --color-plum-light: #5a3d5c;
+  --color-gold: #C9A962;
+  --color-gold-muted: #B89B4F;
+  --color-midnight: #1A1821;
+  --color-midnight-soft: #2a2630;
+  --color-cream: #FFF8F0;
+
+  --font-family-display: 'Playfair Display', serif;
+  --font-family-body: 'Libre Baskerville', serif;
+}
+
+/* Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-body);
+  background-color: var(--parchment);
+  color: var(--midnight);
+  min-height: 100vh;
+  line-height: 1.7;
+}
+
+/* Paper Texture Overlay */
+.paper-texture {
+  position: relative;
+}
+
+.paper-texture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.paper-texture > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* Book-like Card Styling */
+.book-card {
+  background: linear-gradient(135deg, var(--cream) 0%, var(--parchment) 100%);
+  border: 1px solid var(--parchment-dark);
+  box-shadow:
+    0 1px 3px var(--shadow),
+    0 4px 12px rgba(67, 41, 70, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.book-card:hover {
+  box-shadow:
+    0 2px 8px var(--shadow),
+    0 8px 24px rgba(67, 41, 70, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Spine Effect for Book Cards */
+.book-spine {
+  position: relative;
+}
+
+.book-spine::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-muted) 100%);
+  border-radius: 4px 0 0 4px;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
+  color: var(--parchment);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-family: var(--font-family-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(67, 41, 70, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--plum-light) 0%, var(--plum) 100%);
+  box-shadow: 0 4px 16px rgba(67, 41, 70, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--plum);
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-family: var(--font-family-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  transition: all 0.3s ease;
+  border: 1px solid var(--plum);
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--plum);
+  color: var(--parchment);
+}
+
+/* Form Inputs */
+.input-field {
+  background: var(--cream);
+  border: 1px solid var(--parchment-dark);
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-family-body);
+  font-size: 1rem;
+  color: var(--midnight);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+}
+
+.input-field::placeholder {
+  color: var(--midnight-soft);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+/* Textarea */
+.textarea-field {
+  background: var(--cream);
+  border: 1px solid var(--parchment-dark);
+  border-radius: 4px;
+  padding: 1rem;
+  font-family: var(--font-family-body);
+  font-size: 1rem;
+  color: var(--midnight);
+  transition: all 0.2s ease;
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.8;
+}
+
+.textarea-field:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
+}
+
+/* Page Transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Subtle Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.animate-fade-in-delay-1 {
+  animation: fadeIn 0.5s ease 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fadeIn 0.5s ease 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-delay-3 {
+  animation: fadeIn 0.5s ease 0.3s forwards;
+  opacity: 0;
+}
+
+/* Gold accent line */
+.gold-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
+}
+
+/* Sealed badge */
+.sealed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-muted) 100%);
+  color: var(--midnight);
+  font-family: var(--font-family-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+/* Mood Pills */
+.mood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: var(--cream);
+  border: 1px solid var(--parchment-dark);
+  border-radius: 20px;
+  font-family: var(--font-family-body);
+  font-size: 0.875rem;
+  color: var(--midnight-soft);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mood-pill:hover {
+  border-color: var(--gold);
+  color: var(--midnight);
+}
+
+.mood-pill.active {
+  background: var(--plum);
+  border-color: var(--plum);
+  color: var(--parchment);
+}
+
+/* Decorative Elements */
+.ornament {
+  color: var(--gold);
+  font-size: 1.25rem;
+  letter-spacing: 0.5rem;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--parchment-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--plum);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--plum-light);
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  body {
+    font-size: 0.95rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
