@@ -23,12 +23,13 @@ export const metadata: Metadata = {
   title: "Two Souls on the Road",
   description: "A living book of our journeys — Ива ✧ Мео",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Two Souls",
   },
 };

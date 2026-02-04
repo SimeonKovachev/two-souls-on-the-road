@@ -32,6 +32,12 @@ export function TravelMap({ chapters }: TravelMapProps) {
   if (chaptersWithLocations.length === 0) {
     return (
       <div className="text-center py-8">
+        <img
+          src="/images/empty-map.png"
+          alt="No locations yet"
+          className="w-40 h-40 mx-auto mb-4 opacity-70"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
         <p className="text-4xl mb-4">🗺️</p>
         <p className="text-midnight-soft italic">
           No locations added yet.

@@ -132,7 +132,15 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
         disabled={isRevealing}
         className="btn-secondary group relative overflow-hidden"
       >
-        <span className={isRevealing ? "animate-pulse" : ""}>
+        {isRevealing && (
+          <img
+            src="/images/random-magic.png"
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain opacity-30 animate-pulse"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        )}
+        <span className={`relative ${isRevealing ? "animate-pulse" : ""}`}>
           {isRevealing ? "🔮 Revealing..." : "✨ Surprise Me!"}
         </span>
       </button>

@@ -28,7 +28,14 @@ export function BirthdayWelcome({ name, age, partnerName, onClose }: BirthdayWel
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-md">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-md"
+      style={{
+        backgroundImage: 'url(/images/birthday-bg.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <div className="text-center px-6 max-w-md">
         {/* Stars animation */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

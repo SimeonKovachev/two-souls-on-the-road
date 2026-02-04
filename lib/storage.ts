@@ -280,6 +280,7 @@ export async function updateChapter(id: string, updates: Partial<Chapter>): Prom
       if (updates.dateTo !== undefined) dbUpdates.date_to = updates.dateTo;
       if (updates.coverLine !== undefined) dbUpdates.cover_line = updates.coverLine;
       if (updates.coverPhotoUrl !== undefined) dbUpdates.cover_photo_url = updates.coverPhotoUrl;
+      if (updates.location !== undefined) dbUpdates.location = updates.location;
       if (updates.moods !== undefined) dbUpdates.moods = updates.moods;
       if (updates.reflection !== undefined) dbUpdates.reflection = updates.reflection;
       if (updates.sealed !== undefined) dbUpdates.sealed = updates.sealed;
@@ -867,6 +868,48 @@ export function deleteMomentLocal(chapterId: string, momentId: string): boolean 
     return true;
   }
   return false;
+}
+
+export async function toggleMomentFavorite(chapterId: string, momentId: string): Promise<boolean> {
+  if (isSupabaseConfigured()) {
+    try {
+      // First get current state
+      const { data: moment, error: fetchError } = await supabase
+        .from("moments")
+        .select("is_favorite")
+        .eq("id", momentId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const newValue = !moment?.is_favorite;
+
+      const { error } = await supabase
+        .from("moments")
+        .update({ is_favorite: newValue })
+        .eq("id", momentId);
+
+      if (error) throw error;
+      return newValue;
+    } catch (error) {
+      console.error("Supabase error:", error);
+    }
+  }
+
+  return toggleMomentFavoriteLocal(chapterId, momentId);
+}
+
+export function toggleMomentFavoriteLocal(chapterId: string, momentId: string): boolean {
+  const chapter = getChapterByIdLocal(chapterId);
+  if (!chapter) return false;
+
+  const momentIndex = chapter.moments.findIndex((m) => m.id === momentId);
+  if (momentIndex === -1) return false;
+
+  const newValue = !chapter.moments[momentIndex].isFavorite;
+  chapter.moments[momentIndex].isFavorite = newValue;
+  saveChapterLocal(chapter);
+  return newValue;
 }
 
 // ============================================

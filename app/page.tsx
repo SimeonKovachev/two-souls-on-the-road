@@ -197,6 +197,16 @@ export default function HomePage() {
               </div>
             ) : chapters.length === 0 ? (
               <div className="text-center py-12">
+                {/* Empty state illustration */}
+                <img
+                  src="/images/empty-chapters.png"
+                  alt="Begin your journey"
+                  className="w-64 h-auto mx-auto mb-6 opacity-80"
+                  onError={(e) => {
+                    // Hide if image doesn't exist yet
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
                 <p className="text-4xl mb-4">📖</p>
                 <p className="font-body text-midnight-soft italic mb-2">
                   The pages are empty, waiting for your first story.

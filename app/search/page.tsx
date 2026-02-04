@@ -236,6 +236,12 @@ export default function SearchPage() {
           <p className="text-center text-midnight-soft italic animate-pulse">Loading...</p>
         ) : searchResults.length === 0 && (searchQuery || selectedMood || dateFilter) ? (
           <div className="text-center py-12">
+            <img
+              src="/images/empty-search.png"
+              alt="No results"
+              className="w-32 h-32 mx-auto mb-4 opacity-70"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
             <p className="text-4xl mb-4">🔮</p>
             <p className="text-midnight-soft italic">No memories found</p>
             <p className="text-sm text-midnight-soft mt-2">Try a different search term</p>

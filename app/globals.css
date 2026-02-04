@@ -1,53 +1,72 @@
 @import "tailwindcss";
 
 /* ============================================
-   WITCHY NIGHT LIBRARY - Purple & Silver Theme
+   TWO SOULS ON THE ROAD
+   Witchy Night Library - Purple & Silver Theme
    ============================================ */
 
 :root {
-  /* Backgrounds */
+  /* Light Mode Colors */
   --parchment: #F8F6FA;
   --parchment-dark: #EDE8F2;
   --cream: #FDFBFF;
-
-  /* Primary - Deep Purple */
   --plum: #4A2F6B;
   --plum-light: #6B4A8C;
   --plum-dark: #2D1B42;
-
-  /* Accent - Mystical Silver/Lavender */
+  --plum-glow: #8B6AAE;
   --silver: #B8B5C9;
   --silver-light: #D4D1E3;
   --lavender: #9D8EC2;
   --moonlight: #E8E4F5;
-
-  /* Text */
   --midnight: #1A1622;
   --midnight-soft: #3D3650;
-
-  /* Effects */
   --shadow: rgba(45, 27, 66, 0.1);
   --glow: rgba(157, 142, 194, 0.3);
+  --glow-strong: rgba(157, 142, 194, 0.5);
 }
 
-/* Custom Tailwind Theme Extension */
-@theme {
-  --color-parchment: #F8F6FA;
-  --color-parchment-dark: #EDE8F2;
-  --color-plum: #4A2F6B;
-  --color-plum-light: #6B4A8C;
-  --color-silver: #B8B5C9;
-  --color-lavender: #9D8EC2;
-  --color-moonlight: #E8E4F5;
-  --color-midnight: #1A1622;
-  --color-midnight-soft: #3D3650;
-  --color-cream: #FDFBFF;
+/* Dark Mode Colors - Applied when html has .dark class */
+html.dark {
+  --parchment: #0F0D14;
+  --parchment-dark: #0A090E;
+  --cream: #16131D;
+  --plum: #B8A5D6;
+  --plum-light: #C9B8E3;
+  --plum-dark: #9D8EC2;
+  --plum-glow: #D4C6EC;
+  --silver: #3D3650;
+  --silver-light: #4A4358;
+  --lavender: #9D8EC2;
+  --moonlight: #1E1A26;
+  --midnight: #F0ECF8;
+  --midnight-soft: #C9C5D6;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --glow: rgba(157, 142, 194, 0.25);
+  --glow-strong: rgba(157, 142, 194, 0.4);
+}
 
+/* Tailwind Theme Extension */
+@theme {
+  --color-parchment: var(--parchment);
+  --color-parchment-dark: var(--parchment-dark);
+  --color-plum: var(--plum);
+  --color-plum-light: var(--plum-light);
+  --color-plum-dark: var(--plum-dark);
+  --color-silver: var(--silver);
+  --color-silver-light: var(--silver-light);
+  --color-lavender: var(--lavender);
+  --color-moonlight: var(--moonlight);
+  --color-midnight: var(--midnight);
+  --color-midnight-soft: var(--midnight-soft);
+  --color-cream: var(--cream);
   --font-family-display: 'Playfair Display', serif;
   --font-family-body: 'Libre Baskerville', serif;
 }
 
-/* Base Styles */
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -60,22 +79,99 @@ html {
 
 body {
   font-family: var(--font-family-body);
-  background: linear-gradient(180deg, var(--parchment) 0%, var(--moonlight) 100%);
-  background-attachment: fixed;
+  background-color: var(--parchment);
   color: var(--midnight);
   min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  min-height: 100dvh;
   line-height: 1.7;
+  font-size: 1rem;
+  padding-bottom: env(safe-area-inset-bottom);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Paper Texture Overlay with subtle purple tint */
+/* Light mode background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(157, 142, 194, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(74, 47, 107, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+/* Dark mode background */
+html.dark body::before {
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(157, 142, 194, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(74, 47, 107, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(139, 106, 174, 0.04) 0%, transparent 40%);
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--plum-dark);
+  transition: color 0.3s ease;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: var(--plum-light);
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+
+/* Text color utilities that respond to dark mode */
+.text-plum { color: var(--plum) !important; }
+.text-plum-light { color: var(--plum-light) !important; }
+.text-plum-dark { color: var(--plum-dark) !important; }
+.text-lavender { color: var(--lavender) !important; }
+.text-midnight { color: var(--midnight) !important; }
+.text-midnight-soft { color: var(--midnight-soft) !important; }
+.text-parchment { color: var(--parchment) !important; }
+
+/* Background utilities that respond to dark mode */
+.bg-parchment { background-color: var(--parchment) !important; }
+.bg-parchment-dark { background-color: var(--parchment-dark) !important; }
+.bg-cream { background-color: var(--cream) !important; }
+.bg-moonlight { background-color: var(--moonlight) !important; }
+.bg-plum { background-color: var(--plum) !important; }
+.bg-lavender { background-color: var(--lavender) !important; }
+
+/* Border utilities */
+.border-silver { border-color: var(--silver) !important; }
+.border-silver-light { border-color: var(--silver-light) !important; }
+.border-lavender { border-color: var(--lavender) !important; }
+.border-plum { border-color: var(--plum) !important; }
+
+/* ============================================
+   PAPER TEXTURE OVERLAY
+   ============================================ */
+
 .paper-texture {
   position: relative;
 }
 
 .paper-texture::before {
   content: '';
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -86,40 +182,63 @@ body {
   z-index: 0;
 }
 
+html.dark .paper-texture::before {
+  opacity: 0.03;
+}
+
 .paper-texture > * {
   position: relative;
   z-index: 1;
 }
 
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-display);
-  font-weight: 500;
-  line-height: 1.3;
-}
+/* ============================================
+   BOOK CARD STYLING
+   ============================================ */
 
-/* Book-like Card Styling - Witchy Version */
 .book-card {
-  background: linear-gradient(135deg, var(--cream) 0%, var(--parchment) 100%);
+  background: linear-gradient(145deg, var(--cream) 0%, var(--parchment) 100%);
   border: 1px solid var(--silver-light);
   box-shadow:
-    0 1px 3px var(--shadow),
-    0 4px 12px rgba(74, 47, 107, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
+    0 2px 4px var(--shadow),
+    0 8px 16px rgba(74, 47, 107, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
   transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+html.dark .book-card {
+  background: linear-gradient(145deg, var(--cream) 0%, var(--parchment) 100%);
+  border-color: var(--silver);
+  box-shadow:
+    0 2px 8px var(--shadow),
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(157, 142, 194, 0.1);
 }
 
 .book-card:hover {
+  border-color: var(--lavender);
   box-shadow:
-    0 2px 8px var(--shadow),
-    0 8px 24px rgba(74, 47, 107, 0.1),
-    0 0 20px var(--glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    0 4px 12px var(--shadow),
+    0 12px 28px rgba(74, 47, 107, 0.12),
+    0 0 0 1px rgba(157, 142, 194, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-4px);
+}
+
+html.dark .book-card:hover {
+  box-shadow:
+    0 4px 16px var(--shadow),
+    0 12px 32px rgba(0, 0, 0, 0.4),
+    0 0 30px var(--glow),
+    inset 0 1px 0 rgba(157, 142, 194, 0.15);
+}
+
+.book-card:active {
   transform: translateY(-2px);
 }
 
-/* Spine Effect - Purple/Silver gradient */
+/* Spine Effect */
 .book-spine {
   position: relative;
 }
@@ -132,75 +251,291 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
   width: 4px;
   background: linear-gradient(180deg, var(--lavender) 0%, var(--plum) 50%, var(--lavender) 100%);
-  border-radius: 8px 0 0 8px;
+  border-radius: 16px 0 0 16px;
+  transition: width 0.3s ease;
 }
 
-/* Primary Button - Deep Purple with glow */
+.book-spine:hover::before {
+  width: 6px;
+}
+
+/* ============================================
+   BUTTONS - MAGICAL STYLE
+   ============================================ */
+
+/* Primary Button */
 .btn-primary {
+  position: relative;
   background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
   color: var(--cream);
-  padding: 0.875rem 1.75rem;
-  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
   font-family: var(--font-family-display);
   font-size: 1rem;
-  letter-spacing: 0.02em;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   border: none;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(74, 47, 107, 0.25);
-  min-height: 48px; /* Touch-friendly */
+  min-height: 52px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 12px rgba(74, 47, 107, 0.3),
+    0 2px 4px rgba(74, 47, 107, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+html.dark .btn-primary {
+  background: linear-gradient(135deg, var(--plum-dark) 0%, var(--lavender) 100%);
+  color: var(--parchment-dark);
+  box-shadow:
+    0 4px 16px rgba(157, 142, 194, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.5s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--plum-light) 0%, var(--plum) 100%);
-  box-shadow: 0 4px 20px rgba(74, 47, 107, 0.35), 0 0 30px var(--glow);
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, var(--plum-light) 0%, var(--plum-glow) 100%);
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 24px rgba(74, 47, 107, 0.35),
+    0 4px 8px rgba(74, 47, 107, 0.2),
+    0 0 40px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+html.dark .btn-primary:hover {
+  background: linear-gradient(135deg, var(--lavender) 0%, var(--plum-glow) 100%);
+  box-shadow:
+    0 8px 28px rgba(157, 142, 194, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 0 50px var(--glow-strong),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary:hover::before {
+  left: 100%;
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Secondary Button */
 .btn-secondary {
+  position: relative;
   background: transparent;
   color: var(--plum);
-  padding: 0.875rem 1.75rem;
-  border-radius: 8px;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
   font-family: var(--font-family-display);
   font-size: 1rem;
-  letter-spacing: 0.02em;
-  transition: all 0.3s ease;
-  border: 1px solid var(--lavender);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  border: 2px solid var(--lavender);
   cursor: pointer;
-  min-height: 48px; /* Touch-friendly */
+  min-height: 52px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px transparent;
+}
+
+html.dark .btn-secondary {
+  color: var(--lavender);
+  border-color: var(--lavender);
+}
+
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--plum);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+html.dark .btn-secondary::before {
+  background: var(--lavender);
 }
 
 .btn-secondary:hover {
+  color: var(--cream);
+  border-color: var(--plum);
+  box-shadow: 0 4px 16px rgba(74, 47, 107, 0.2);
+  transform: translateY(-2px);
+}
+
+html.dark .btn-secondary:hover {
+  color: var(--parchment-dark);
+  border-color: var(--lavender);
+}
+
+.btn-secondary:hover::before {
+  transform: scaleX(1);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  color: var(--plum);
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-family: var(--font-family-display);
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.15s ease;
+}
+
+html.dark .btn-ghost {
+  color: var(--lavender);
+}
+
+.btn-ghost:hover {
+  background: var(--moonlight);
+  color: var(--plum-dark);
+}
+
+html.dark .btn-ghost:hover {
+  background: var(--silver);
+  color: var(--midnight);
+}
+
+.btn-ghost:active {
+  background: var(--silver-light);
+}
+
+/* Icon Button */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--cream);
+  border: 1px solid var(--silver-light);
+  color: var(--plum);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+html.dark .btn-icon {
+  background: var(--cream);
+  border-color: var(--silver);
+  color: var(--lavender);
+}
+
+.btn-icon:hover {
   background: var(--plum);
   color: var(--cream);
   border-color: var(--plum);
-  box-shadow: 0 0 20px var(--glow);
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(74, 47, 107, 0.25);
 }
 
-/* Form Inputs - Witchy style */
+html.dark .btn-icon:hover {
+  background: var(--lavender);
+  color: var(--parchment-dark);
+  border-color: var(--lavender);
+}
+
+.btn-icon:active {
+  transform: scale(0.98);
+}
+
+/* Floating Action Button */
+.btn-fab {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
+  color: var(--cream);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow:
+    0 4px 16px rgba(74, 47, 107, 0.35),
+    0 0 0 4px rgba(157, 142, 194, 0.2);
+  transition: all 0.3s ease;
+  z-index: 40;
+}
+
+.btn-fab:hover {
+  transform: scale(1.1) rotate(90deg);
+  box-shadow:
+    0 8px 28px rgba(74, 47, 107, 0.4),
+    0 0 0 8px rgba(157, 142, 194, 0.15);
+}
+
+/* ============================================
+   FORM INPUTS
+   ============================================ */
+
 .input-field {
   background: var(--cream);
-  border: 1px solid var(--silver-light);
-  border-radius: 8px;
-  padding: 0.875rem 1rem;
+  border: 2px solid var(--silver-light);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
   font-family: var(--font-family-body);
-  font-size: 16px; /* Prevents zoom on iOS */
+  font-size: 16px;
   color: var(--midnight);
-  transition: all 0.2s ease;
   width: 100%;
-  min-height: 48px; /* Touch-friendly */
+  min-height: 52px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+html.dark .input-field {
+  background: var(--parchment-dark);
+  border-color: var(--silver);
+  color: var(--midnight);
+}
+
+.input-field:hover {
+  border-color: var(--silver);
 }
 
 .input-field:focus {
   outline: none;
   border-color: var(--lavender);
-  box-shadow: 0 0 0 3px var(--glow);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.02),
+    0 0 0 4px var(--glow);
 }
 
 .input-field::placeholder {
@@ -212,345 +547,282 @@ h1, h2, h3, h4, h5, h6 {
 /* Textarea */
 .textarea-field {
   background: var(--cream);
-  border: 1px solid var(--silver-light);
-  border-radius: 8px;
-  padding: 1rem;
+  border: 2px solid var(--silver-light);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
   font-family: var(--font-family-body);
-  font-size: 16px; /* Prevents zoom on iOS */
+  font-size: 16px;
   color: var(--midnight);
-  transition: all 0.2s ease;
   width: 100%;
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
   line-height: 1.8;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.textarea-field:focus {
-  outline: none;
-  border-color: var(--lavender);
-  box-shadow: 0 0 0 3px var(--glow);
-}
-
-/* Subtle Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 5px var(--glow);
-  }
-  50% {
-    box-shadow: 0 0 20px var(--glow), 0 0 30px var(--glow);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.animate-fade-in-delay-1 {
-  animation: fadeIn 0.5s ease 0.1s forwards;
-  opacity: 0;
-}
-
-.animate-fade-in-delay-2 {
-  animation: fadeIn 0.5s ease 0.2s forwards;
-  opacity: 0;
-}
-
-.animate-fade-in-delay-3 {
-  animation: fadeIn 0.5s ease 0.3s forwards;
-  opacity: 0;
-}
-
-/* Silver/Lavender accent line - renamed from gold-line */
-.mystic-line,
-.gold-line {
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, var(--lavender) 50%, transparent 100%);
-}
-
-/* Sealed badge - Mystical purple */
-.sealed-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 1rem;
-  background: linear-gradient(135deg, var(--lavender) 0%, var(--plum-light) 100%);
-  color: var(--cream);
-  font-family: var(--font-family-display);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px var(--glow);
-}
-
-/* Mood Pills */
-.mood-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.625rem 1rem;
-  background: var(--cream);
-  border: 1px solid var(--silver-light);
-  border-radius: 24px;
-  font-family: var(--font-family-body);
-  font-size: 0.875rem;
-  color: var(--midnight-soft);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 44px; /* Touch-friendly */
-}
-
-.mood-pill:hover {
-  border-color: var(--lavender);
-  color: var(--midnight);
-  box-shadow: 0 0 10px var(--glow);
-}
-
-.mood-pill.active {
-  background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
-  border-color: var(--plum);
-  color: var(--cream);
-  box-shadow: 0 2px 10px rgba(74, 47, 107, 0.3);
-}
-
-/* Decorative Elements - Silver stars */
-.ornament {
-  color: var(--lavender);
-  font-size: 1.25rem;
-  letter-spacing: 0.5rem;
-  text-shadow: 0 0 10px var(--glow);
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--moonlight);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--lavender);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--plum-light);
-}
-
-/* Auto-save indicator */
-.auto-save-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: var(--lavender);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.auto-save-indicator.saving {
-  opacity: 1;
-}
-
-.auto-save-indicator.saved {
-  opacity: 1;
-  color: var(--plum-light);
-}
-
-/* ============================================
-   MOBILE-FIRST RESPONSIVE DESIGN
-   ============================================ */
-
-/* Base mobile styles (default) */
-body {
-  font-size: 1rem;
-  padding-bottom: env(safe-area-inset-bottom); /* iPhone notch */
-}
-
-/* Touch-friendly spacing */
-button,
-.btn-primary,
-.btn-secondary,
-.mood-pill,
-input,
-textarea,
-select {
-  touch-action: manipulation;
-}
-
-/* Prevent text selection on buttons */
-button {
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-/* Mobile: Smaller screens */
-@media (max-width: 480px) {
-  body {
-    font-size: 0.95rem;
-  }
-
-  h1 {
-    font-size: 1.75rem !important;
-  }
-
-  h2 {
-    font-size: 1.25rem !important;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
-    width: 100%;
-  }
-
-  .book-card {
-    border-radius: 12px;
-  }
-
-  .mood-pill {
-    padding: 0.5rem 0.875rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* Tablet and up */
-@media (min-width: 640px) {
-  body {
-    font-size: 1rem;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    width: auto;
-  }
-}
-
-/* Desktop */
-@media (min-width: 1024px) {
-  body {
-    font-size: 1.05rem;
-  }
-}
-
-/* Landscape phone */
-@media (max-height: 500px) and (orientation: landscape) {
-  .paper-texture {
-    min-height: 100vh;
-  }
-}
-
-/* ============================================
-   DARK MODE - Witchy Night Theme
-   ============================================ */
-
-html.dark {
-  --parchment: #1A1622;
-  --parchment-dark: #13101A;
-  --cream: #1E1A26;
-
-  --plum: #9D8EC2;
-  --plum-light: #B8A5D6;
-  --plum-dark: #6B4A8C;
-
-  --silver: #4A4358;
-  --silver-light: #5A5368;
-  --lavender: #9D8EC2;
-  --moonlight: #2D2835;
-
-  --midnight: #E8E4F5;
-  --midnight-soft: #B8B5C9;
-
-  --shadow: rgba(0, 0, 0, 0.3);
-  --glow: rgba(157, 142, 194, 0.4);
-}
-
-html.dark body {
-  background: linear-gradient(180deg, var(--parchment) 0%, #0D0A12 100%);
-}
-
-html.dark .book-card {
-  background: linear-gradient(135deg, var(--cream) 0%, var(--parchment) 100%);
-  border-color: var(--silver);
-}
-
-html.dark .input-field,
 html.dark .textarea-field {
   background: var(--parchment-dark);
   border-color: var(--silver);
   color: var(--midnight);
 }
 
-html.dark .input-field::placeholder,
-html.dark .textarea-field::placeholder {
+.textarea-field:hover {
+  border-color: var(--silver);
+}
+
+.textarea-field:focus {
+  outline: none;
+  border-color: var(--lavender);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.02),
+    0 0 0 4px var(--glow);
+}
+
+/* ============================================
+   MOOD PILLS
+   ============================================ */
+
+.mood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--cream);
+  border: 2px solid var(--silver-light);
+  border-radius: 50px;
+  font-family: var(--font-family-body);
+  font-size: 0.9rem;
+  color: var(--midnight-soft);
+  cursor: pointer;
+  min-height: 48px;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+html.dark .mood-pill {
+  background: var(--cream);
+  border-color: var(--silver);
   color: var(--midnight-soft);
 }
 
-html.dark .btn-secondary {
+.mood-pill:hover {
   border-color: var(--lavender);
+  color: var(--plum);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+html.dark .mood-pill:hover {
   color: var(--lavender);
 }
 
-html.dark .btn-secondary:hover {
-  background: var(--plum);
-  color: var(--parchment);
+.mood-pill.active {
+  background: linear-gradient(135deg, var(--plum) 0%, var(--plum-light) 100%);
+  border-color: var(--plum);
+  color: var(--cream);
+  box-shadow:
+    0 4px 12px rgba(74, 47, 107, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-html.dark ::-webkit-scrollbar-track {
-  background: var(--parchment-dark);
+html.dark .mood-pill.active {
+  background: linear-gradient(135deg, var(--plum-dark) 0%, var(--lavender) 100%);
+  border-color: var(--lavender);
+  color: var(--parchment-dark);
 }
 
-html.dark ::-webkit-scrollbar-thumb {
-  background: var(--silver);
+.mood-pill.active:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 16px rgba(74, 47, 107, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Safe area for bottom navigation */
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+/* ============================================
+   BADGES & PILLS
+   ============================================ */
+
+.sealed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, var(--lavender) 0%, var(--plum-light) 100%);
+  color: var(--cream);
+  font-family: var(--font-family-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px var(--glow);
 }
 
-/* Reduce motion for accessibility */
+/* ============================================
+   DECORATIVE ELEMENTS
+   ============================================ */
+
+.ornament {
+  color: var(--lavender);
+  font-size: 1.25rem;
+  letter-spacing: 0.5rem;
+  text-shadow: 0 0 12px var(--glow);
+}
+
+.mystic-line,
+.gold-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--lavender) 50%, transparent 100%);
+  border-radius: 1px;
+}
+
+/* Glowing Divider */
+.divider-glow {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lavender), var(--plum-light), var(--lavender), transparent);
+  margin: 2rem 0;
+  position: relative;
+}
+
+.divider-glow::after {
+  content: '✦';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--parchment);
+  padding: 0 1rem;
+  color: var(--lavender);
+  font-size: 0.875rem;
+}
+
+html.dark .divider-glow::after {
+  background: var(--parchment);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px var(--glow); }
+  50% { box-shadow: 0 0 24px var(--glow-strong), 0 0 40px var(--glow); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+.animate-fade-in-delay-1 { animation: fadeIn 0.5s ease 0.1s forwards; opacity: 0; }
+.animate-fade-in-delay-2 { animation: fadeIn 0.5s ease 0.2s forwards; opacity: 0; }
+.animate-fade-in-delay-3 { animation: fadeIn 0.5s ease 0.3s forwards; opacity: 0; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-sparkle { animation: sparkle 2s ease-in-out infinite; }
+
+/* ============================================
+   AUTO-SAVE INDICATOR
+   ============================================ */
+
+.auto-save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--lavender);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.auto-save-indicator.saving { opacity: 1; }
+.auto-save-indicator.saved { opacity: 1; color: var(--plum-light); }
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--moonlight); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--lavender), var(--plum-light)); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--plum-light), var(--plum)); }
+
+html.dark ::-webkit-scrollbar-track { background: var(--parchment-dark); }
+html.dark ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--silver), var(--lavender)); }
+
+/* ============================================
+   TOUCH & INTERACTION
+   ============================================ */
+
+button, .btn-primary, .btn-secondary, .btn-ghost, .btn-icon, .mood-pill, input, textarea, select, a {
+  touch-action: manipulation;
+}
+
+button {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+
+@media (max-width: 480px) {
+  body { font-size: 0.95rem; }
+  h1 { font-size: 1.75rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.1rem !important; }
+  .btn-primary, .btn-secondary { padding: 0.75rem 1.5rem; font-size: 0.95rem; width: 100%; }
+  .book-card { border-radius: 12px; }
+  .mood-pill { padding: 0.625rem 1rem; font-size: 0.85rem; }
+}
+
+@media (min-width: 640px) {
+  .btn-primary, .btn-secondary { width: auto; }
+}
+
+@media (min-width: 1024px) {
+  body { font-size: 1.05rem; }
+}
+
+/* ============================================
+   SAFE AREA & ACCESSIBILITY
+   ============================================ */
+
+.safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .book-card {
-    border-width: 2px;
-  }
+/* ============================================
+   PRINT STYLES
+   ============================================ */
 
-  .btn-primary,
-  .btn-secondary {
-    border-width: 2px;
-  }
+@media print {
+  body { background: white !important; color: black !important; }
+  .book-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .btn-primary, .btn-secondary, .btn-ghost, .btn-icon, .btn-fab { display: none !important; }
 }
