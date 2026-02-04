@@ -12,6 +12,7 @@ import { BirthdayWelcome } from "@/components/BirthdayWelcome";
 import { AnniversaryCounter, isAnniversary } from "@/components/AnniversaryCounter";
 import { RandomMemory } from "@/components/RandomMemory";
 import { SecretLoveNote, getTodaysNote, isTodayBirthday } from "@/components/SecretLoveNote";
+import { BookOpen, Sparkles, Download, ChevronUp, ChevronDown, Heart, Star, Flower2, Moon } from "lucide-react";
 
 const DEFAULT_SETTINGS: AppSettings = {
   darkMode: false,
@@ -127,8 +128,8 @@ export default function HomePage() {
               A living book of our journeys
             </p>
 
-            <p className="text-lavender text-sm tracking-widest">
-              Ива ✧ Мео
+            <p className="text-lavender text-sm tracking-widest inline-flex items-center gap-2">
+              <Flower2 className="w-4 h-4" /> Ива <Star className="w-3 h-3" /> Мео <Moon className="w-4 h-4" />
             </p>
           </header>
 
@@ -137,8 +138,8 @@ export default function HomePage() {
             <div className="mb-6 animate-fade-in-delay-1">
               <AnniversaryCounter startDate={settings.anniversaryDate} />
               {isAnniversary(settings.anniversaryDate) && (
-                <p className="text-center text-lavender animate-pulse mt-2">
-                  ✨ Happy Anniversary! ✨
+                <p className="text-center text-lavender animate-pulse mt-2 inline-flex items-center justify-center gap-2">
+                  <Heart className="w-4 h-4 fill-current" /> Happy Anniversary! <Heart className="w-4 h-4 fill-current" />
                 </p>
               )}
             </div>
@@ -166,7 +167,8 @@ export default function HomePage() {
 
           {/* Actions */}
           <div className="flex flex-col items-center gap-4 mb-8 animate-fade-in-delay-1">
-            <Link href="/new-chapter" className="btn-primary">
+            <Link href="/new-chapter" className="btn-primary inline-flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
               Begin a new chapter
             </Link>
 
@@ -177,9 +179,11 @@ export default function HomePage() {
 
             <button
               onClick={() => setShowBackup(!showBackup)}
-              className="text-sm text-midnight-soft hover:text-plum transition-colors"
+              className="text-sm text-midnight-soft hover:text-plum transition-colors inline-flex items-center gap-2"
             >
+              <Download className="w-4 h-4" />
               {showBackup ? "Hide backup options" : "Backup & restore"}
+              {showBackup ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
 
             {showBackup && (
@@ -207,7 +211,7 @@ export default function HomePage() {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
-                <p className="text-4xl mb-4">📖</p>
+                <BookOpen className="w-16 h-16 text-plum/50 mx-auto mb-4" />
                 <p className="font-body text-midnight-soft italic mb-2">
                   The pages are empty, waiting for your first story.
                 </p>

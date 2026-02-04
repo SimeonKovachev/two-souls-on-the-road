@@ -5,6 +5,10 @@ import Link from "next/link";
 import { AppSettings, SpecialDate, generateId, Author } from "@/lib/types";
 import { Ornament, PageDivider } from "@/components/Ornament";
 import { BottomNavSpacer } from "@/components/BottomNav";
+import { useDarkMode } from "@/components/DarkModeProvider";
+import { useNotifications } from "@/components/NotificationProvider";
+import { useResetPin } from "@/components/PinLock";
+import { Moon, Bell, Lock, Heart, Cake, Gift, Flower2, ArrowLeft, X, Check, Plus } from "lucide-react";
 
 const DEFAULT_SETTINGS: AppSettings = {
   darkMode: false,
@@ -31,6 +35,9 @@ function saveSettings(settings: AppSettings) {
 export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { isSupported: notificationsSupported, permission, requestPermission } = useNotifications();
+  const { resetPin } = useResetPin();
 
   // Secret love note form
   const [newNote, setNewNote] = useState({
@@ -51,6 +58,12 @@ export default function SettingsPage() {
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
     saveSettings(newSettings);
+  };
+
+  // Handle dark mode toggle separately to use context
+  const handleDarkModeToggle = () => {
+    toggleDarkMode();
+    updateSettings({ darkMode: !isDarkMode });
   };
 
   const addSpecialDate = () => {
@@ -107,23 +120,83 @@ export default function SettingsPage() {
           {/* Dark Mode */}
           <section className="book-card p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-display text-plum">🌙 Dark Mode</h3>
-                <p className="text-xs text-midnight-soft">Switch to a darker theme</p>
+              <div className="flex items-center gap-3">
+                <Moon className="w-5 h-5 text-plum" />
+                <div>
+                  <h3 className="font-display text-plum">Dark Mode</h3>
+                  <p className="text-xs text-midnight-soft">Switch to a darker theme</p>
+                </div>
               </div>
               <button
-                onClick={() => updateSettings({ darkMode: !settings.darkMode })}
+                onClick={handleDarkModeToggle}
                 className={`
                   w-14 h-8 rounded-full transition-all relative
-                  ${settings.darkMode ? "bg-plum" : "bg-silver-light"}
+                  ${isDarkMode ? "bg-plum" : "bg-silver-light"}
                 `}
               >
                 <span
                   className={`
                     absolute top-1 w-6 h-6 rounded-full bg-parchment transition-all shadow
-                    ${settings.darkMode ? "left-7" : "left-1"}
+                    ${isDarkMode ? "left-7" : "left-1"}
                   `}
                 />
+              </button>
+            </div>
+          </section>
+
+          {/* Notifications */}
+          <section className="book-card p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-plum" />
+                <div>
+                  <h3 className="font-display text-plum">Notifications</h3>
+                  <p className="text-xs text-midnight-soft">
+                    {!notificationsSupported
+                      ? "Not supported on this device"
+                      : permission === "granted"
+                      ? "You'll receive alerts for special moments"
+                      : permission === "denied"
+                      ? "Notifications are blocked"
+                      : "Enable to get alerts for time capsules & messages"
+                    }
+                  </p>
+                </div>
+              </div>
+              {notificationsSupported && permission !== "granted" && permission !== "denied" && (
+                <button
+                  onClick={requestPermission}
+                  className="btn-secondary text-sm py-2 px-4"
+                >
+                  Enable
+                </button>
+              )}
+              {permission === "granted" && (
+                <span className="text-green-600 text-sm flex items-center gap-1">
+                  <Check className="w-4 h-4" /> Enabled
+                </span>
+              )}
+              {permission === "denied" && (
+                <span className="text-red-500 text-sm">Blocked</span>
+              )}
+            </div>
+          </section>
+
+          {/* PIN Security */}
+          <section className="book-card p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Lock className="w-5 h-5 text-plum" />
+                <div>
+                  <h3 className="font-display text-plum">PIN Security</h3>
+                  <p className="text-xs text-midnight-soft">Protect your memories with a PIN</p>
+                </div>
+              </div>
+              <button
+                onClick={resetPin}
+                className="btn-ghost text-sm py-2 px-4"
+              >
+                Reset PIN
               </button>
             </div>
           </section>
@@ -132,10 +205,15 @@ export default function SettingsPage() {
 
           {/* Anniversary Date */}
           <section className="book-card p-4">
-            <h3 className="font-display text-plum mb-2">💕 Anniversary Date</h3>
-            <p className="text-xs text-midnight-soft mb-3">
-              When did your story begin? This will show a counter on the home page.
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+              <Heart className="w-5 h-5 text-plum" />
+              <div>
+                <h3 className="font-display text-plum">Anniversary Date</h3>
+                <p className="text-xs text-midnight-soft">
+                  When did your story begin? This will show a counter on the home page.
+                </p>
+              </div>
+            </div>
             <input
               type="date"
               value={settings.anniversaryDate || ""}
@@ -146,10 +224,15 @@ export default function SettingsPage() {
 
           {/* Birthdays */}
           <section className="book-card p-4">
-            <h3 className="font-display text-plum mb-2">🎂 Birthdays</h3>
-            <p className="text-xs text-midnight-soft mb-3">
-              Get special birthday messages on these dates.
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+              <Cake className="w-5 h-5 text-plum" />
+              <div>
+                <h3 className="font-display text-plum">Birthdays</h3>
+                <p className="text-xs text-midnight-soft">
+                  Get special birthday messages on these dates.
+                </p>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-plum-light block mb-1">Ива&apos;s Birthday</label>
@@ -181,17 +264,20 @@ export default function SettingsPage() {
           {/* Secret Love Notes */}
           <section className="book-card p-4">
             <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="font-display text-plum">💝 Secret Love Notes</h3>
-                <p className="text-xs text-midnight-soft">
-                  Hidden messages that appear on special dates
-                </p>
+              <div className="flex items-center gap-3">
+                <Gift className="w-5 h-5 text-plum" />
+                <div>
+                  <h3 className="font-display text-plum">Secret Love Notes</h3>
+                  <p className="text-xs text-midnight-soft">
+                    Hidden messages that appear on special dates
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setShowNoteForm(!showNoteForm)}
-                className="btn-secondary text-sm py-1 px-3"
+                className="btn-secondary text-sm py-1 px-3 flex items-center gap-1"
               >
-                {showNoteForm ? "Cancel" : "+ Add"}
+                {showNoteForm ? "Cancel" : <><Plus className="w-4 h-4" /> Add</>}
               </button>
             </div>
 
@@ -236,8 +322,8 @@ export default function SettingsPage() {
                     onChange={(e) => setNewNote({ ...newNote, author: e.target.value as Author })}
                     className="input-field text-sm flex-1"
                   >
-                    <option value="ива">🌸 From Ива</option>
-                    <option value="мео">🌙 From Мео</option>
+                    <option value="ива">From Ива</option>
+                    <option value="мео">From Мео</option>
                   </select>
                   <button
                     onClick={addSpecialDate}
@@ -264,16 +350,23 @@ export default function SettingsPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-display text-plum">{note.title}</p>
-                      <p className="text-xs text-midnight-soft">
-                        {note.date} • {note.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
-                        {note.isSecret && " • 🔒 Secret"}
+                      <p className="text-xs text-midnight-soft flex items-center gap-1">
+                        {note.date} •
+                        <span className="inline-flex items-center gap-0.5">
+                          <Flower2 className="w-3 h-3" /> {note.author === "ива" ? "Ива" : "Мео"}
+                        </span>
+                        {note.isSecret && (
+                          <span className="inline-flex items-center gap-0.5">
+                            • <Lock className="w-3 h-3" /> Secret
+                          </span>
+                        )}
                       </p>
                     </div>
                     <button
                       onClick={() => removeSpecialDate(note.id)}
                       className="text-red-600 hover:text-red-700 text-sm px-2"
                     >
-                      ✕
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
@@ -298,9 +391,9 @@ export default function SettingsPage() {
         <div className="text-center mt-8">
           <Link
             href="/"
-            className="text-plum hover:text-plum-light transition-colors text-sm"
+            className="text-plum hover:text-plum-light transition-colors text-sm inline-flex items-center gap-2"
           >
-            ← Back to Home
+            <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
         </div>
       </div>

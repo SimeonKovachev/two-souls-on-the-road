@@ -1,73 +1,47 @@
-// Two Souls on the Road - Enhanced Type Definitions
-
-// ============================================
-// AUTHORS
-// ============================================
-
 export type Author = "ива" | "мео";
 
-export const AUTHORS: { id: Author; name: string; icon: string }[] = [
-  { id: "ива", name: "Ива", icon: "🌸" },
-  { id: "мео", name: "Мео", icon: "🌙" },
+export const AUTHORS: { id: Author; name: string }[] = [
+  { id: "ива", name: "Ива" },
+  { id: "мео", name: "Мео" },
 ];
-
-// ============================================
-// MOODS
-// ============================================
 
 export type Mood = "calm" | "warm" | "inspired" | "free" | "grounded" | "dreamy" | "adventurous" | "melancholic" | "grateful" | "playful";
 
 export interface MoodOption {
   id: Mood;
   label: string;
-  icon: string;
   tooltip: string;
   color: string;
 }
 
-// Witchy Purple/Silver color palette for moods
 export const MOOD_OPTIONS: MoodOption[] = [
-  { id: "calm", label: "Calm", icon: "🌊", tooltip: "Peaceful and serene", color: "#8B9DC3" },
-  { id: "warm", label: "Warm", icon: "🕯️", tooltip: "Cozy and tender", color: "#C4A4B5" },
-  { id: "inspired", label: "Inspired", icon: "✨", tooltip: "Creative and alive", color: "#B8A5D6" },
-  { id: "free", label: "Free", icon: "🦋", tooltip: "Light and unbounded", color: "#A8C5D9" },
-  { id: "grounded", label: "Grounded", icon: "🌿", tooltip: "Rooted and present", color: "#9EB5A8" },
-  { id: "dreamy", label: "Dreamy", icon: "🌙", tooltip: "Soft and ethereal", color: "#9D8EC2" },
-  { id: "adventurous", label: "Adventurous", icon: "🗺️", tooltip: "Bold and curious", color: "#7B6B8D" },
-  { id: "melancholic", label: "Melancholic", icon: "🍂", tooltip: "Beautifully bittersweet", color: "#8E7B94" },
-  { id: "grateful", label: "Grateful", icon: "🙏", tooltip: "Full of appreciation", color: "#A699C1" },
-  { id: "playful", label: "Playful", icon: "🎈", tooltip: "Light-hearted joy", color: "#C9A4C5" },
+  { id: "calm", label: "Calm", tooltip: "Peaceful and serene", color: "#8B9DC3" },
+  { id: "warm", label: "Warm", tooltip: "Cozy and tender", color: "#C4A4B5" },
+  { id: "inspired", label: "Inspired", tooltip: "Creative and alive", color: "#B8A5D6" },
+  { id: "free", label: "Free", tooltip: "Light and unbounded", color: "#A8C5D9" },
+  { id: "grounded", label: "Grounded", tooltip: "Rooted and present", color: "#9EB5A8" },
+  { id: "dreamy", label: "Dreamy", tooltip: "Soft and ethereal", color: "#9D8EC2" },
+  { id: "adventurous", label: "Adventurous", tooltip: "Bold and curious", color: "#7B6B8D" },
+  { id: "melancholic", label: "Melancholic", tooltip: "Beautifully bittersweet", color: "#8E7B94" },
+  { id: "grateful", label: "Grateful", tooltip: "Full of appreciation", color: "#A699C1" },
+  { id: "playful", label: "Playful", tooltip: "Light-hearted joy", color: "#C9A4C5" },
 ];
-
-// ============================================
-// PHOTOS
-// ============================================
 
 export interface Photo {
   id: string;
-  url: string; // Supabase storage URL or data URL
+  url: string;
   caption?: string;
   author: Author;
   createdAt: string;
 }
 
-// ============================================
-// DAILY ENTRIES
-// ============================================
-
 export interface DayEntry {
   id: string;
   chapterId: string;
-  date: string; // YYYY-MM-DD
-
-  // Mood tracking
+  date: string;
   morningMood?: Mood;
   eveningMood?: Mood;
-
-  // The day's story
   photos: Photo[];
-
-  // Journaling prompts (answered)
   prompts: {
     promptId: string;
     question: string;
@@ -75,29 +49,18 @@ export interface DayEntry {
     author: Author;
     answeredAt: string;
   }[];
-
-  // Quick thoughts throughout the day
   thoughts: {
     id: string;
     text: string;
     author: Author;
     createdAt: string;
   }[];
-
-  // Gratitude
   gratitude?: string;
   gratitudeAuthor?: Author;
-
-  // One word for the day
   wordOfTheDay?: string;
-
   createdAt: string;
   updatedAt: string;
 }
-
-// ============================================
-// LETTERS (Private notes to each other)
-// ============================================
 
 export interface Letter {
   id: string;
@@ -110,10 +73,6 @@ export interface Letter {
   readAt?: string;
 }
 
-// ============================================
-// TIME CAPSULES
-// ============================================
-
 export interface TimeCapsule {
   id: string;
   chapterId: string;
@@ -121,15 +80,11 @@ export interface TimeCapsule {
   content: string;
   photos: Photo[];
   author: Author;
-  unlockDate: string; // YYYY-MM-DD - when it can be opened
+  unlockDate: string;
   isUnlocked: boolean;
   createdAt: string;
   unlockedAt?: string;
 }
-
-// ============================================
-// LEGACY MOMENT TYPE (for backwards compatibility)
-// ============================================
 
 export interface Moment {
   id: string;
@@ -137,43 +92,26 @@ export interface Moment {
   photoDataUrl?: string;
   author?: Author;
   createdAt: number;
-  isFavorite?: boolean; // NEW: Star/favorite moments
+  isFavorite?: boolean;
 }
-
-// ============================================
-// SPECIAL DATES & LOVE NOTES
-// ============================================
 
 export interface SpecialDate {
   id: string;
-  date: string; // MM-DD format (repeats yearly) or YYYY-MM-DD for specific year
+  date: string;
   title: string;
   message: string;
   author: Author;
-  isSecret: boolean; // Only shown on the date itself
+  isSecret: boolean;
 }
 
 export interface AppSettings {
-  // Anniversary (for counter)
-  anniversaryDate?: string; // YYYY-MM-DD when you got together
-
-  // Dark mode
+  anniversaryDate?: string;
   darkMode: boolean;
-
-  // Birthday (for special message)
-  ivaBirthday?: string; // MM-DD
-  meoBirthday?: string; // MM-DD
-
-  // First time setup done
+  ivaBirthday?: string;
+  meoBirthday?: string;
   welcomeShown: boolean;
-
-  // Special love notes (secret messages for special dates)
   specialDates: SpecialDate[];
 }
-
-// ============================================
-// MAP LOCATIONS
-// ============================================
 
 export interface MapLocation {
   lat: number;
@@ -181,36 +119,20 @@ export interface MapLocation {
   name: string;
 }
 
-// ============================================
-// CHAPTERS (Enhanced)
-// ============================================
-
 export interface Chapter {
   id: string;
   destination: string;
-  subtitle?: string; // A poetic subtitle
+  subtitle?: string;
   dateFrom?: string;
   dateTo?: string;
   coverLine?: string;
   coverPhotoUrl?: string;
-  location?: MapLocation; // For map integration
-
-  // Overall trip moods (summary)
+  location?: MapLocation;
   moods: Mood[];
-
-  // Legacy moments (keeping for backwards compatibility)
   moments: Moment[];
-
-  // Daily entries (the main content now)
   dayEntries: DayEntry[];
-
-  // Letters between partners
   letters: Letter[];
-
-  // Time capsules
   timeCapsules: TimeCapsule[];
-
-  // First & Last impressions
   firstImpression?: {
     text: string;
     author: Author;
@@ -221,60 +143,39 @@ export interface Chapter {
     author: Author;
     createdAt: string;
   };
-
-  // The unexpected - things you didn't plan
   unexpectedMoments: {
     id: string;
     text: string;
     author: Author;
     createdAt: string;
   }[];
-
-  // Final reflection
   reflection?: string;
   reflectionPrompt: string;
-
-  // Status
   sealed: boolean;
-
-  // Timestamps
   createdAt: string;
   updatedAt: string;
 }
 
-// ============================================
-// DAILY PROMPTS POOL
-// ============================================
-
 export const DAILY_PROMPTS: string[] = [
-  // Sensory
   "What scent will you remember from today?",
   "What sound defined this day?",
   "Describe the light you saw today.",
   "What taste will stay with you?",
   "What did your hands touch today that felt meaningful?",
-
-  // Emotional
   "What surprised you today?",
   "A small moment that made you smile",
   "What are you grateful for right now?",
   "What felt difficult today?",
   "When did you feel most alive today?",
-
-  // Connection
   "What did you learn about each other today?",
   "A moment you shared without words",
   "Something your partner did that touched you",
   "A laugh you shared today",
-
-  // Reflection
   "If this day were a color, what would it be?",
   "A song that would soundtrack this day",
   "What would you tell your past self about today?",
   "What do you want to remember most?",
   "How did this place change you today?",
-
-  // Curiosity
   "A stranger you noticed today",
   "Something you ate that touched your soul",
   "A detail others might have missed",
@@ -282,15 +183,10 @@ export const DAILY_PROMPTS: string[] = [
   "What remains a mystery from today?",
 ];
 
-// Get random prompts for a day
 export function getRandomDailyPrompts(count: number = 3): string[] {
   const shuffled = [...DAILY_PROMPTS].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
-
-// ============================================
-// REFLECTION PROMPTS
-// ============================================
 
 export const REFLECTION_PROMPTS: string[] = [
   "What did this place awaken in you?",
@@ -310,17 +206,10 @@ export function getRandomReflectionPrompt(): string {
   return REFLECTION_PROMPTS[index];
 }
 
-// ============================================
-// UTILITIES
-// ============================================
-
-// Generate a proper UUID v4 that matches Supabase's expected format
 export function generateId(): string {
-  // Crypto API is available in both browser and Node.js
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  // Fallback for older environments
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
@@ -365,7 +254,6 @@ export function formatDateRange(from?: string, to?: string): string {
   return `${formatDate(from)} – ${formatDate(to)}`;
 }
 
-// Get days between two dates
 export function getDaysBetween(from: string, to: string): string[] {
   const dates: string[] = [];
   const current = new Date(from);
@@ -379,24 +267,16 @@ export function getDaysBetween(from: string, to: string): string[] {
   return dates;
 }
 
-// Check if a time capsule can be opened
 export function canOpenTimeCapsule(capsule: TimeCapsule): boolean {
   if (capsule.isUnlocked) return true;
   const today = new Date().toISOString().split("T")[0];
   return today >= capsule.unlockDate;
 }
 
-// Get mood color
 export function getMoodColor(mood: Mood): string {
   return MOOD_OPTIONS.find(m => m.id === mood)?.color || "#C9A962";
 }
 
-// Get mood icon
-export function getMoodIcon(mood: Mood): string {
-  return MOOD_OPTIONS.find(m => m.id === mood)?.icon || "✨";
-}
-
-// Get author info
 export function getAuthorInfo(author: Author) {
   return AUTHORS.find(a => a.id === author) || AUTHORS[0];
 }

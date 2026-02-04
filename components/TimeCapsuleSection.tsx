@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { TimeCapsule, Author, canOpenTimeCapsule, getAuthorInfo, formatDate } from "@/lib/types";
-import { AuthorSelector } from "./AuthorSelector";
 import { GoldLine } from "./Ornament";
+import { Button, Timer, Lock, Unlock, Sparkles, Plus, X, Flower2, Moon } from "./ui";
 
 interface TimeCapsuleSectionProps {
   capsules: TimeCapsule[];
@@ -11,6 +11,11 @@ interface TimeCapsuleSectionProps {
   onCreateCapsule: (title: string, content: string, author: Author, unlockDate: string) => void;
   onUnlockCapsule: (capsuleId: string) => void;
   disabled?: boolean;
+}
+
+function AuthorIcon({ author }: { author: Author }) {
+  const Icon = author === "ива" ? Flower2 : Moon;
+  return <Icon className="w-3 h-3" />;
 }
 
 export function TimeCapsuleSection({
@@ -48,7 +53,6 @@ export function TimeCapsuleSection({
     }
   };
 
-  // Calculate minimum date (tomorrow)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split("T")[0];
@@ -57,7 +61,7 @@ export function TimeCapsuleSection({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-lg text-plum flex items-center gap-2">
-          ⏳ Time Capsules
+          <Timer className="w-5 h-5" /> Time Capsules
           {readyToOpen.length > 0 && (
             <span className="bg-lavender text-midnight text-xs px-2 py-0.5 rounded-full animate-pulse">
               {readyToOpen.length} ready!
@@ -65,16 +69,12 @@ export function TimeCapsuleSection({
           )}
         </h3>
         {!disabled && !isCreating && (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="btn-secondary text-sm"
-          >
-            Create capsule
-          </button>
+          <Button variant="secondary" size="sm" icon={Plus} onClick={() => setIsCreating(true)}>
+            Create
+          </Button>
         )}
       </div>
 
-      {/* Creating mode */}
       {isCreating && (
         <div className="book-card p-4 space-y-4 animate-fade-in">
           <p className="text-sm text-midnight-soft italic text-center">
@@ -114,29 +114,30 @@ export function TimeCapsuleSection({
           </div>
 
           <div className="flex gap-2 justify-end">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setIsCreating(false);
                 setTitle("");
                 setContent("");
                 setUnlockDate("");
               }}
-              className="btn-secondary text-sm"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
+              icon={Timer}
               onClick={handleCreate}
               disabled={!title.trim() || !content.trim() || !unlockDate}
-              className="btn-primary text-sm disabled:opacity-50"
             >
-              Seal the capsule ⏳
-            </button>
+              Seal the capsule
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Locked capsules */}
       {lockedCapsules.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs text-midnight-soft">Waiting to be opened...</p>
@@ -158,19 +159,19 @@ export function TimeCapsuleSection({
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-display text-plum">{capsule.title}</h4>
-                    <p className="text-xs text-midnight-soft">
-                      By {getAuthorInfo(capsule.author).icon} {getAuthorInfo(capsule.author).name}
+                    <p className="text-xs text-midnight-soft inline-flex items-center gap-1">
+                      By <AuthorIcon author={capsule.author} /> {getAuthorInfo(capsule.author).name}
                     </p>
                   </div>
                   <div className="text-right">
                     {canOpen ? (
-                      <span className="text-lavender font-display animate-pulse">
-                        ✨ Ready to open!
+                      <span className="text-lavender font-display animate-pulse inline-flex items-center gap-1">
+                        <Sparkles className="w-4 h-4" /> Ready to open!
                       </span>
                     ) : (
                       <>
-                        <p className="text-sm text-midnight-soft">
-                          🔒 {formatDate(capsule.unlockDate)}
+                        <p className="text-sm text-midnight-soft inline-flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> {formatDate(capsule.unlockDate)}
                         </p>
                         <p className="text-xs text-lavender">
                           {daysUntil} day{daysUntil !== 1 ? "s" : ""} left
@@ -185,7 +186,6 @@ export function TimeCapsuleSection({
         </div>
       )}
 
-      {/* Unlocked capsules */}
       {unlockedCapsules.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs text-midnight-soft">Opened memories</p>
@@ -202,7 +202,7 @@ export function TimeCapsuleSection({
                     Opened {capsule.unlockedAt ? formatDate(capsule.unlockedAt) : ""}
                   </p>
                 </div>
-                <span className="text-lavender">✨</span>
+                <Sparkles className="w-5 h-5 text-lavender" />
               </div>
             </button>
           ))}
@@ -211,14 +211,13 @@ export function TimeCapsuleSection({
 
       {capsules.length === 0 && !isCreating && (
         <div className="text-center py-6">
-          <p className="text-4xl mb-2">⏳</p>
+          <Timer className="w-10 h-10 text-plum/50 mx-auto mb-2" />
           <p className="text-midnight-soft italic text-sm">
             No time capsules yet. Create one to send a message to your future selves!
           </p>
         </div>
       )}
 
-      {/* Viewing modal */}
       {viewingCapsule && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -227,10 +226,10 @@ export function TimeCapsuleSection({
           />
           <div className="relative book-card p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto animate-fade-in">
             <div className="text-center mb-4">
-              <p className="text-3xl mb-2">✨</p>
+              <Sparkles className="w-8 h-8 text-lavender mx-auto mb-2" />
               <h3 className="font-display text-xl text-plum">{viewingCapsule.title}</h3>
-              <p className="text-xs text-midnight-soft mt-1">
-                Created by {getAuthorInfo(viewingCapsule.author).icon} {getAuthorInfo(viewingCapsule.author).name}
+              <p className="text-xs text-midnight-soft mt-1 inline-flex items-center justify-center gap-1">
+                Created by <AuthorIcon author={viewingCapsule.author} /> {getAuthorInfo(viewingCapsule.author).name}
               </p>
               <p className="text-xs text-lavender">
                 {formatDate(viewingCapsule.createdAt)}
@@ -245,12 +244,9 @@ export function TimeCapsuleSection({
 
             <GoldLine />
 
-            <button
-              onClick={() => setViewingCapsule(null)}
-              className="btn-secondary w-full mt-4"
-            >
+            <Button variant="secondary" fullWidth className="mt-4" onClick={() => setViewingCapsule(null)}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -2,10 +2,25 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Chapter, Mood, MOOD_OPTIONS, formatDate } from "@/lib/types";
+import { Chapter, Mood, MOOD_OPTIONS, formatDate, Author } from "@/lib/types";
 import { getAllChapters } from "@/lib/storage";
 import { Ornament } from "@/components/Ornament";
 import { BottomNavSpacer } from "@/components/BottomNav";
+import {
+  Book,
+  Sparkles,
+  MessageCircle,
+  Mail,
+  HandHeart,
+  Search,
+  Wand2,
+  ArrowLeft,
+  X,
+  Flower2,
+  Moon,
+  type LucideIcon,
+} from "lucide-react";
+import { Button, MOOD_ICONS } from "@/components/ui";
 
 interface SearchResult {
   type: "chapter" | "moment" | "thought" | "letter" | "gratitude";
@@ -14,6 +29,24 @@ interface SearchResult {
   text: string;
   date?: string;
   author?: string;
+}
+
+const TYPE_ICONS: Record<string, LucideIcon> = {
+  chapter: Book,
+  moment: Sparkles,
+  thought: MessageCircle,
+  letter: Mail,
+  gratitude: HandHeart,
+};
+
+function AuthorBadge({ author }: { author: Author }) {
+  const Icon = author === "ива" ? Flower2 : Moon;
+  const name = author === "ива" ? "Ива" : "Мео";
+  return (
+    <span className="bg-parchment-dark px-2 py-0.5 rounded inline-flex items-center gap-1">
+      <Icon className="w-3 h-3" /> {name}
+    </span>
+  );
 }
 
 export default function SearchPage() {
@@ -32,7 +65,6 @@ export default function SearchPage() {
     loadData();
   }, []);
 
-  // Build searchable index
   const searchResults = useMemo(() => {
     if (!searchQuery.trim() && !selectedMood && !dateFilter) {
       return [];
@@ -42,7 +74,6 @@ export default function SearchPage() {
     const query = searchQuery.toLowerCase().trim();
 
     chapters.forEach((chapter) => {
-      // Search chapter name
       if (query && chapter.destination.toLowerCase().includes(query)) {
         results.push({
           type: "chapter",
@@ -53,7 +84,6 @@ export default function SearchPage() {
         });
       }
 
-      // Search moments
       chapter.moments.forEach((moment) => {
         if (query && moment.text.toLowerCase().includes(query)) {
           results.push({
@@ -67,9 +97,7 @@ export default function SearchPage() {
         }
       });
 
-      // Search day entries
       chapter.dayEntries.forEach((entry) => {
-        // Filter by mood
         if (selectedMood) {
           if (entry.morningMood === selectedMood || entry.eveningMood === selectedMood) {
             results.push({
@@ -82,7 +110,6 @@ export default function SearchPage() {
           }
         }
 
-        // Filter by date
         if (dateFilter && entry.date === dateFilter) {
           results.push({
             type: "chapter",
@@ -93,7 +120,6 @@ export default function SearchPage() {
           });
         }
 
-        // Search thoughts
         entry.thoughts.forEach((thought) => {
           if (query && thought.text.toLowerCase().includes(query)) {
             results.push({
@@ -107,7 +133,6 @@ export default function SearchPage() {
           }
         });
 
-        // Search gratitude
         if (query && entry.gratitude?.toLowerCase().includes(query)) {
           results.push({
             type: "gratitude",
@@ -120,7 +145,6 @@ export default function SearchPage() {
         }
       });
 
-      // Search letters
       chapter.letters.forEach((letter) => {
         if (query && letter.content.toLowerCase().includes(query)) {
           results.push({
@@ -134,7 +158,6 @@ export default function SearchPage() {
         }
       });
 
-      // Search reflection
       if (query && chapter.reflection?.toLowerCase().includes(query)) {
         results.push({
           type: "chapter",
@@ -146,7 +169,6 @@ export default function SearchPage() {
       }
     });
 
-    // Remove duplicates
     const seen = new Set<string>();
     return results.filter((r) => {
       const key = `${r.chapterId}-${r.type}-${r.text.slice(0, 50)}`;
@@ -156,25 +178,17 @@ export default function SearchPage() {
     });
   }, [chapters, searchQuery, selectedMood, dateFilter]);
 
-  const typeIcons: Record<string, string> = {
-    chapter: "📖",
-    moment: "✨",
-    thought: "💭",
-    letter: "💌",
-    gratitude: "🙏",
-  };
-
   return (
     <main className="min-h-screen px-4 py-8 pb-24 md:pb-12">
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
         <header className="text-center mb-8">
           <Ornament className="mb-4" />
-          <h1 className="font-display text-2xl text-plum mb-2">Search Memories</h1>
+          <h1 className="font-display text-2xl text-plum mb-2 flex items-center justify-center gap-2">
+            <Search className="w-6 h-6" /> Search Memories
+          </h1>
           <p className="text-midnight-soft text-sm italic">Find your treasured moments</p>
         </header>
 
-        {/* Search Input */}
         <div className="space-y-4 mb-8">
           <input
             type="text"
@@ -185,9 +199,7 @@ export default function SearchPage() {
             autoFocus
           />
 
-          {/* Filters */}
           <div className="flex flex-wrap gap-3">
-            {/* Mood filter */}
             <div className="flex-1 min-w-[150px]">
               <label className="text-xs text-midnight-soft mb-1 block">Filter by mood</label>
               <select
@@ -198,13 +210,12 @@ export default function SearchPage() {
                 <option value="">All moods</option>
                 {MOOD_OPTIONS.map((mood) => (
                   <option key={mood.id} value={mood.id}>
-                    {mood.icon} {mood.label}
+                    {mood.label}
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Date filter */}
             <div className="flex-1 min-w-[150px]">
               <label className="text-xs text-midnight-soft mb-1 block">Filter by date</label>
               <input
@@ -216,33 +227,27 @@ export default function SearchPage() {
             </div>
           </div>
 
-          {/* Clear filters */}
           {(searchQuery || selectedMood || dateFilter) && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={X}
               onClick={() => {
                 setSearchQuery("");
                 setSelectedMood(null);
                 setDateFilter("");
               }}
-              className="text-sm text-lavender hover:text-plum transition-colors"
             >
               Clear all filters
-            </button>
+            </Button>
           )}
         </div>
 
-        {/* Results */}
         {!isLoaded ? (
           <p className="text-center text-midnight-soft italic animate-pulse">Loading...</p>
         ) : searchResults.length === 0 && (searchQuery || selectedMood || dateFilter) ? (
           <div className="text-center py-12">
-            <img
-              src="/images/empty-search.png"
-              alt="No results"
-              className="w-32 h-32 mx-auto mb-4 opacity-70"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-            <p className="text-4xl mb-4">🔮</p>
+            <Wand2 className="w-12 h-12 text-plum/50 mx-auto mb-4" />
             <p className="text-midnight-soft italic">No memories found</p>
             <p className="text-sm text-midnight-soft mt-2">Try a different search term</p>
           </div>
@@ -251,44 +256,42 @@ export default function SearchPage() {
             <p className="text-sm text-midnight-soft mb-4">
               Found {searchResults.length} result{searchResults.length !== 1 ? "s" : ""}
             </p>
-            {searchResults.map((result, index) => (
-              <Link
-                key={`${result.chapterId}-${index}`}
-                href={`/chapter/${result.chapterId}`}
-                className="block book-card p-4 hover:scale-[1.01] transition-transform"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-xl">{typeIcons[result.type]}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-plum font-display">{result.chapterName}</p>
-                    <p className="text-midnight line-clamp-2 text-sm mt-1">{result.text}</p>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-midnight-soft">
-                      {result.date && <span>{formatDate(result.date)}</span>}
-                      {result.author && (
-                        <span className="bg-parchment-dark px-2 py-0.5 rounded">
-                          {result.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
-                        </span>
-                      )}
+            {searchResults.map((result, index) => {
+              const Icon = TYPE_ICONS[result.type];
+              return (
+                <Link
+                  key={`${result.chapterId}-${index}`}
+                  href={`/chapter/${result.chapterId}`}
+                  className="block book-card p-4 hover:scale-[1.01] transition-transform"
+                >
+                  <div className="flex items-start gap-3">
+                    <Icon className="w-5 h-5 text-plum flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-plum font-display">{result.chapterName}</p>
+                      <p className="text-midnight line-clamp-2 text-sm mt-1">{result.text}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-midnight-soft">
+                        {result.date && <span>{formatDate(result.date)}</span>}
+                        {result.author && <AuthorBadge author={result.author as Author} />}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-4xl mb-4">🔍</p>
+            <Search className="w-12 h-12 text-plum/50 mx-auto mb-4" />
             <p className="text-midnight-soft italic">Start typing to search your memories</p>
           </div>
         )}
 
-        {/* Back link */}
         <div className="text-center mt-8">
           <Link
             href="/"
-            className="text-plum hover:text-plum-light transition-colors text-sm"
+            className="text-plum hover:text-plum-light transition-colors text-sm inline-flex items-center gap-2"
           >
-            ← Back to Home
+            <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Chapter, Moment, formatDate } from "@/lib/types";
+import { Sparkles, MessageCircle, Heart, Mail, FileText, BookOpen, Wand2, RefreshCw, Flower2 } from "lucide-react";
 
 interface RandomMemoryProps {
   chapters: Chapter[];
@@ -109,12 +110,12 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
     }, 1000);
   };
 
-  const typeIcons: Record<string, string> = {
-    moment: "✨",
-    thought: "💭",
-    gratitude: "🙏",
-    letter: "💌",
-    reflection: "📝",
+  const typeIcons: Record<string, React.ReactNode> = {
+    moment: <Sparkles className="w-5 h-5" />,
+    thought: <MessageCircle className="w-5 h-5" />,
+    gratitude: <Heart className="w-5 h-5" />,
+    letter: <Mail className="w-5 h-5" />,
+    reflection: <FileText className="w-5 h-5" />,
   };
 
   const typeLabels: Record<string, string> = {
@@ -130,7 +131,7 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
       <button
         onClick={revealRandomMemory}
         disabled={isRevealing}
-        className="btn-secondary group relative overflow-hidden"
+        className="btn-secondary group relative overflow-hidden inline-flex items-center gap-2"
       >
         {isRevealing && (
           <img
@@ -140,8 +141,9 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
         )}
-        <span className={`relative ${isRevealing ? "animate-pulse" : ""}`}>
-          {isRevealing ? "🔮 Revealing..." : "✨ Surprise Me!"}
+        <span className={`relative inline-flex items-center gap-2 ${isRevealing ? "animate-pulse" : ""}`}>
+          {isRevealing ? <Wand2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {isRevealing ? "Revealing..." : "Surprise Me!"}
         </span>
       </button>
 
@@ -150,9 +152,9 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
         <div className="mt-6 animate-fade-in">
           <div className="book-card p-6 text-left max-w-md mx-auto">
             {/* Type badge */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">{typeIcons[memory.type]}</span>
-              <span className="text-xs text-lavender font-display uppercase tracking-wide">
+            <div className="flex items-center gap-2 mb-3 text-lavender">
+              {typeIcons[memory.type]}
+              <span className="text-xs font-display uppercase tracking-wide">
                 {typeLabels[memory.type]}
               </span>
             </div>
@@ -173,13 +175,13 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
 
             {/* Meta */}
             <div className="flex items-center justify-between text-xs text-midnight-soft">
-              <span>
-                📖 {memory.chapterName}
+              <span className="inline-flex items-center gap-1">
+                <BookOpen className="w-3 h-3" /> {memory.chapterName}
                 {memory.date && ` • ${formatDate(memory.date)}`}
               </span>
               {memory.author && (
-                <span className="bg-parchment-dark px-2 py-0.5 rounded">
-                  {memory.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
+                <span className="bg-parchment-dark px-2 py-0.5 rounded inline-flex items-center gap-1">
+                  <Flower2 className="w-3 h-3" /> {memory.author === "ива" ? "Ива" : "Мео"}
                 </span>
               )}
             </div>
@@ -196,9 +198,9 @@ export function RandomMemory({ chapters }: RandomMemoryProps) {
           {/* Try again */}
           <button
             onClick={revealRandomMemory}
-            className="mt-4 text-sm text-lavender hover:text-plum transition-colors"
+            className="mt-4 text-sm text-lavender hover:text-plum transition-colors inline-flex items-center gap-2"
           >
-            Show another memory
+            <RefreshCw className="w-4 h-4" /> Show another memory
           </button>
         </div>
       )}

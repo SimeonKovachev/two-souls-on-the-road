@@ -38,8 +38,7 @@ export function TravelMap({ chapters }: TravelMapProps) {
           className="w-40 h-40 mx-auto mb-4 opacity-70"
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
-        <p className="text-4xl mb-4">🗺️</p>
-        <p className="text-midnight-soft italic">
+                <p className="text-midnight-soft italic">
           No locations added yet.
         </p>
         <p className="text-xs text-midnight-soft mt-2">
@@ -58,7 +57,7 @@ export function TravelMap({ chapters }: TravelMapProps) {
     <div className="space-y-4">
       {/* Simple list view with map links */}
       <div className="book-card p-4">
-        <h3 className="font-display text-plum mb-4 text-center">🗺️ Places We&apos;ve Been</h3>
+        <h3 className="font-display text-plum mb-4 text-center">Places We&apos;ve Been</h3>
 
         {/* Map preview - opens in new tab */}
         <a

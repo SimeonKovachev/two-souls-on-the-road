@@ -1,6 +1,7 @@
 "use client";
 
 import { Mood, MOOD_OPTIONS } from "@/lib/types";
+import { MOOD_ICONS } from "@/components/ui";
 
 interface MoodPickerProps {
   selected: Mood[];
@@ -17,6 +18,7 @@ export function MoodPicker({ selected, onToggle, disabled = false }: MoodPickerP
       <div className="flex flex-wrap gap-2">
         {MOOD_OPTIONS.map((mood) => {
           const isActive = selected.includes(mood.id);
+          const Icon = MOOD_ICONS[mood.id];
           return (
             <button
               key={mood.id}
@@ -29,7 +31,7 @@ export function MoodPicker({ selected, onToggle, disabled = false }: MoodPickerP
                 ${disabled ? "opacity-60 cursor-not-allowed" : ""}
               `}
             >
-              <span>{mood.icon}</span>
+              {Icon && <Icon className="w-4 h-4" />}
               <span>{mood.label}</span>
             </button>
           );

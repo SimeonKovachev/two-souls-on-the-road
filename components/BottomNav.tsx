@@ -2,20 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Book, Sparkles, Map, Search, Settings, type LucideIcon } from "lucide-react";
 
 interface NavItem {
   href: string;
-  icon: string;
+  icon: LucideIcon;
   label: string;
-  matchPath?: string; // For matching chapter/* paths
+  matchPath?: string;
 }
 
 const navItems: NavItem[] = [
-  { href: "/", icon: "📖", label: "Home" },
-  { href: "/new-chapter", icon: "✨", label: "New" },
-  { href: "/map", icon: "🗺️", label: "Map" },
-  { href: "/search", icon: "🔍", label: "Search" },
-  { href: "/settings", icon: "⚙️", label: "Settings" },
+  { href: "/", icon: Book, label: "Home" },
+  { href: "/new-chapter", icon: Sparkles, label: "New" },
+  { href: "/map", icon: Map, label: "Map" },
+  { href: "/search", icon: Search, label: "Search" },
+  { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export function BottomNav() {
@@ -32,6 +33,7 @@ export function BottomNav() {
         {navItems.map((item) => {
           const isActive = pathname === item.href ||
             (item.matchPath && pathname?.startsWith(item.matchPath));
+          const Icon = item.icon;
 
           return (
             <Link
@@ -46,7 +48,7 @@ export function BottomNav() {
                 }
               `}
             >
-              <span className="text-xl mb-0.5">{item.icon}</span>
+              <Icon className="w-5 h-5 mb-0.5" strokeWidth={isActive ? 2.5 : 2} />
               <span className="text-xs font-display">{item.label}</span>
             </Link>
           );
