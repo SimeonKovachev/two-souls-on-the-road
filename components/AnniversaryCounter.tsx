@@ -1,7 +1,9 @@
 "use client";
 
+import { Heart } from "lucide-react";
+
 interface AnniversaryCounterProps {
-  startDate: string; // YYYY-MM-DD
+  startDate: string;
   className?: string;
 }
 
@@ -9,11 +11,9 @@ export function AnniversaryCounter({ startDate, className = "" }: AnniversaryCou
   const start = new Date(startDate);
   const now = new Date();
 
-  // Calculate difference
   const diffTime = Math.abs(now.getTime() - start.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-  // Years, months, days
   const years = Math.floor(diffDays / 365);
   const months = Math.floor((diffDays % 365) / 30);
   const days = diffDays % 30;
@@ -39,14 +39,13 @@ export function AnniversaryCounter({ startDate, className = "" }: AnniversaryCou
           <span className="text-xs block text-midnight-soft">day{days !== 1 ? "s" : ""}</span>
         </div>
       </div>
-      <p className="text-lavender text-lg mt-1">
-        {diffDays.toLocaleString()} days of love ✨
+      <p className="text-lavender text-lg mt-1 inline-flex items-center justify-center gap-2">
+        {diffDays.toLocaleString()} days of love <Heart className="w-4 h-4 fill-current" />
       </p>
     </div>
   );
 }
 
-// Check if today is anniversary
 export function isAnniversary(startDate: string): boolean {
   if (!startDate) return false;
   const today = new Date();
@@ -54,7 +53,6 @@ export function isAnniversary(startDate: string): boolean {
   return today.getMonth() === start.getMonth() && today.getDate() === start.getDate();
 }
 
-// Get anniversary year (how many years together)
 export function getAnniversaryYear(startDate: string): number {
   const today = new Date();
   const start = new Date(startDate);

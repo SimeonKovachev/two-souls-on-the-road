@@ -8,6 +8,7 @@ import { createChapter } from "@/lib/storage";
 import { Ornament, PageDivider } from "@/components/Ornament";
 import { LocationPicker } from "@/components/TravelMap";
 import { BottomNavSpacer } from "@/components/BottomNav";
+import { Button, ArrowLeft, MapPin, BookOpen, Mail, Timer, Moon, Map, Sparkles, Calendar } from "@/components/ui";
 
 export default function NewChapterPage() {
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function NewChapterPage() {
         location
       );
 
-      // Navigate to the new chapter
       router.push(`/chapter/${chapter.id}`);
     } catch (error) {
       console.error("Error creating chapter:", error);
@@ -41,7 +41,6 @@ export default function NewChapterPage() {
     }
   };
 
-  // Calculate number of days if both dates are set
   const getDayCount = () => {
     if (!dateFrom || !dateTo) return null;
     const from = new Date(dateFrom);
@@ -55,15 +54,13 @@ export default function NewChapterPage() {
   return (
     <main className="min-h-screen px-4 py-8 pb-24 md:py-12 md:pb-12">
       <div className="max-w-lg mx-auto">
-        {/* Back link */}
         <Link
           href="/"
-          className="inline-flex items-center text-sm text-plum hover:text-plum-light transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-plum hover:text-plum-light transition-colors mb-8"
         >
-          ← Back to the Grimoire
+          <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
 
-        {/* Header */}
         <header className="text-center mb-8 animate-fade-in">
           <Ornament className="mb-4" />
           <h1 className="font-display text-2xl md:text-3xl text-plum mb-2">
@@ -76,9 +73,7 @@ export default function NewChapterPage() {
 
         <PageDivider />
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in-delay-1">
-          {/* Destination */}
           <div>
             <label htmlFor="destination" className="block font-display text-sm text-plum mb-2">
               Destination *
@@ -95,11 +90,10 @@ export default function NewChapterPage() {
             />
           </div>
 
-          {/* Location picker */}
           <div>
-            <label className="block font-display text-sm text-plum mb-2">
-              📍 Map Location
-              <span className="font-body text-midnight-soft italic ml-2">(optional)</span>
+            <label className="block font-display text-sm text-plum mb-2 flex items-center gap-2">
+              <MapPin className="w-4 h-4" /> Map Location
+              <span className="font-body text-midnight-soft italic ml-1">(optional)</span>
             </label>
             <LocationPicker value={location} onChange={setLocation} />
             <p className="text-xs text-midnight-soft mt-1 italic">
@@ -107,7 +101,6 @@ export default function NewChapterPage() {
             </p>
           </div>
 
-          {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="dateFrom" className="block font-display text-sm text-plum mb-2">
@@ -136,14 +129,13 @@ export default function NewChapterPage() {
             </div>
           </div>
 
-          {/* Day count info */}
           {dayCount && (
-            <p className="text-center text-sm text-lavender animate-fade-in">
-              ✨ {dayCount} day{dayCount !== 1 ? "s" : ""} of adventure — you&apos;ll get a daily journal for each!
+            <p className="text-center text-sm text-lavender animate-fade-in flex items-center justify-center gap-2">
+              <Calendar className="w-4 h-4" />
+              {dayCount} day{dayCount !== 1 ? "s" : ""} of adventure — you&apos;ll get a daily journal for each!
             </p>
           )}
 
-          {/* Cover line */}
           <div>
             <label htmlFor="coverLine" className="block font-display text-sm text-plum mb-2">
               Opening line
@@ -162,32 +154,43 @@ export default function NewChapterPage() {
             </p>
           </div>
 
-          {/* Submit */}
           <div className="pt-4">
-            <button
+            <Button
               type="submit"
+              fullWidth
               disabled={!destination.trim() || isCreating}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              loading={isCreating}
+              icon={BookOpen}
             >
               {isCreating ? "Creating your chapter..." : "Open this chapter"}
-            </button>
+            </Button>
           </div>
         </form>
 
-        {/* Info about features */}
         <div className="mt-8 p-4 bg-cream rounded-lg border border-parchment-dark animate-fade-in-delay-2">
-          <h3 className="font-display text-sm text-plum mb-2 text-center">What awaits in each chapter:</h3>
-          <ul className="text-xs text-midnight-soft space-y-1">
-            <li>📖 Daily journal with mood tracking & prompts</li>
-            <li>💌 Private letters to each other</li>
-            <li>⏳ Time capsules to unlock in the future</li>
-            <li>🌙 Mood visualization & constellation</li>
-            <li>🗺️ Map location tracking</li>
-            <li>✨ Moments, photos, and reflections</li>
+          <h3 className="font-display text-sm text-plum mb-3 text-center">What awaits in each chapter:</h3>
+          <ul className="text-xs text-midnight-soft space-y-2">
+            <li className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-plum" /> Daily journal with mood tracking & prompts
+            </li>
+            <li className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-plum" /> Private letters to each other
+            </li>
+            <li className="flex items-center gap-2">
+              <Timer className="w-4 h-4 text-plum" /> Time capsules to unlock in the future
+            </li>
+            <li className="flex items-center gap-2">
+              <Moon className="w-4 h-4 text-plum" /> Mood visualization & constellation
+            </li>
+            <li className="flex items-center gap-2">
+              <Map className="w-4 h-4 text-plum" /> Map location tracking
+            </li>
+            <li className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-plum" /> Moments, photos, and reflections
+            </li>
           </ul>
         </div>
 
-        {/* Footer */}
         <footer className="mt-12 text-center animate-fade-in-delay-3">
           <Ornament />
         </footer>

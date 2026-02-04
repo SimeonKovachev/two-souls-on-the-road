@@ -32,8 +32,50 @@ import { LettersSection } from "@/components/LettersSection";
 import { TimeCapsuleSection } from "@/components/TimeCapsuleSection";
 import { MoodVisualization } from "@/components/MoodVisualization";
 import { useAutoSave, AutoSaveIndicator } from "@/lib/useAutoSave";
+import { Button } from "@/components/ui";
+import {
+  BookOpen,
+  Sparkles,
+  Mail,
+  Timer,
+  Moon,
+  Sunrise,
+  Sunset,
+  Star,
+  Printer,
+  ArrowLeft,
+  Flower2,
+  Trash2,
+  Lock,
+  Unlock,
+  type LucideIcon,
+} from "lucide-react";
 
 type TabType = "days" | "moments" | "letters" | "capsules" | "moods";
+
+interface TabConfig {
+  id: TabType;
+  label: string;
+  icon: LucideIcon;
+}
+
+const TABS: TabConfig[] = [
+  { id: "days", label: "Daily Journal", icon: BookOpen },
+  { id: "moments", label: "Moments", icon: Sparkles },
+  { id: "letters", label: "Letters", icon: Mail },
+  { id: "capsules", label: "Time Capsules", icon: Timer },
+  { id: "moods", label: "Mood Map", icon: Moon },
+];
+
+function AuthorBadge({ author }: { author: Author }) {
+  const Icon = author === "ива" ? Flower2 : Moon;
+  const name = author === "ива" ? "Ива" : "Мео";
+  return (
+    <span className="inline-flex items-center gap-1 text-lavender">
+      <Icon className="w-3 h-3" /> {name}
+    </span>
+  );
+}
 
 export default function ChapterPage() {
   const params = useParams();
@@ -50,7 +92,6 @@ export default function ChapterPage() {
   const [firstImpression, setFirstImpression] = useState("");
   const [lastNightThoughts, setLastNightThoughts] = useState("");
 
-  // Track if initial values were loaded to prevent auto-save on load
   const initialLoadedRef = useRef(false);
 
   const loadChapter = useCallback(async () => {
@@ -62,7 +103,6 @@ export default function ChapterPage() {
       setLastNightThoughts(data.lastNightThoughts?.text || "");
     }
     setIsLoaded(true);
-    // Mark initial load complete after a short delay
     setTimeout(() => {
       initialLoadedRef.current = true;
     }, 100);
@@ -72,7 +112,6 @@ export default function ChapterPage() {
     loadChapter();
   }, [loadChapter]);
 
-  // Auto-save for reflection
   const { status: reflectionStatus, triggerSave: triggerReflectionSave } = useAutoSave({
     delay: 1000,
     onSave: useCallback(async () => {
@@ -84,7 +123,6 @@ export default function ChapterPage() {
     }, [chapter, chapterId, reflection]),
   });
 
-  // Auto-save for first impression
   const { status: firstImpressionStatus, triggerSave: triggerFirstImpressionSave } = useAutoSave({
     delay: 1000,
     onSave: useCallback(async () => {
@@ -102,7 +140,6 @@ export default function ChapterPage() {
     }, [chapter, chapterId, firstImpression, currentAuthor]),
   });
 
-  // Auto-save for last night thoughts
   const { status: lastNightStatus, triggerSave: triggerLastNightSave } = useAutoSave({
     delay: 1000,
     onSave: useCallback(async () => {
@@ -120,7 +157,6 @@ export default function ChapterPage() {
     }, [chapter, chapterId, lastNightThoughts, currentAuthor]),
   });
 
-  // Trigger auto-save when text changes (only after initial load)
   useEffect(() => {
     if (initialLoadedRef.current && reflection !== (chapter?.reflection || "")) {
       triggerReflectionSave();
@@ -139,10 +175,6 @@ export default function ChapterPage() {
     }
   }, [lastNightThoughts, chapter?.lastNightThoughts, triggerLastNightSave]);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
-
   const handleMoodToggle = async (mood: Mood) => {
     if (!chapter || chapter.sealed) return;
     const updated = await toggleMood(chapterId, mood);
@@ -155,37 +187,6 @@ export default function ChapterPage() {
     if (updated) setChapter(updated);
   };
 
-  const handleReflectionSave = async () => {
-    if (!chapter || chapter.sealed) return;
-    const updated = await updateChapter(chapterId, { reflection: reflection.trim() });
-    if (updated) setChapter(updated);
-  };
-
-  const handleFirstImpressionSave = async () => {
-    if (!chapter || chapter.sealed) return;
-    const updated = await updateChapter(chapterId, {
-      firstImpression: {
-        text: firstImpression.trim(),
-        author: currentAuthor,
-        createdAt: new Date().toISOString(),
-      },
-    });
-    if (updated) setChapter(updated);
-  };
-
-  const handleLastNightSave = async () => {
-    if (!chapter || chapter.sealed) return;
-    const updated = await updateChapter(chapterId, {
-      lastNightThoughts: {
-        text: lastNightThoughts.trim(),
-        author: currentAuthor,
-        createdAt: new Date().toISOString(),
-      },
-    });
-    if (updated) setChapter(updated);
-  };
-
-  // Moments
   const handleAddMoment = async (text: string, photoDataUrl?: string) => {
     if (!chapter || chapter.sealed) return;
     await addMoment(chapterId, text, photoDataUrl, currentAuthor);
@@ -199,7 +200,6 @@ export default function ChapterPage() {
     setDeletingMomentId(null);
   };
 
-  // Day entries
   const handleUpdateDayMood = async (dayEntryId: string, type: "morning" | "evening", mood: Mood) => {
     if (!chapter || chapter.sealed) return;
     await updateDayEntry(chapterId, dayEntryId, {
@@ -238,7 +238,6 @@ export default function ChapterPage() {
     loadChapter();
   };
 
-  // Letters
   const handleCreateLetter = async (from: Author, to: Author, content: string) => {
     if (!chapter) return;
     await createLetter(chapterId, from, to, content);
@@ -251,7 +250,6 @@ export default function ChapterPage() {
     loadChapter();
   };
 
-  // Time capsules
   const handleCreateCapsule = async (title: string, content: string, author: Author, unlockDate: string) => {
     if (!chapter) return;
     await createTimeCapsule(chapterId, title, content, author, unlockDate);
@@ -264,15 +262,10 @@ export default function ChapterPage() {
     loadChapter();
   };
 
-  // Delete chapter
   const handleDeleteChapter = async () => {
     await deleteChapter(chapterId);
     router.push("/");
   };
-
-  // ============================================
-  // RENDER
-  // ============================================
 
   if (!isLoaded) {
     return (
@@ -286,9 +279,9 @@ export default function ChapterPage() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center px-4">
         <p className="text-midnight-soft italic mb-4">This chapter was not found.</p>
-        <Link href="/" className="btn-secondary">
-          Return to the Grimoire
-        </Link>
+        <Button variant="secondary" onClick={() => router.push("/")}>
+          Return to Home
+        </Button>
       </main>
     );
   }
@@ -297,34 +290,25 @@ export default function ChapterPage() {
   const isSealed = chapter.sealed;
   const hasDayEntries = chapter.dayEntries && chapter.dayEntries.length > 0;
 
-  const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: "days", label: "Daily Journal", icon: "📖" },
-    { id: "moments", label: "Moments", icon: "✨" },
-    { id: "letters", label: "Letters", icon: "💌" },
-    { id: "capsules", label: "Time Capsules", icon: "⏳" },
-    { id: "moods", label: "Mood Map", icon: "🌙" },
-  ];
-
   return (
     <main className="min-h-screen px-4 py-8 md:py-12">
       <div className="max-w-2xl mx-auto">
-        {/* Back link */}
         <Link
           href="/"
-          className="inline-flex items-center text-sm text-plum hover:text-plum-light transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-sm text-plum hover:text-plum-light transition-colors mb-8"
         >
-          ← Back to the Grimoire
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
         </Link>
 
-        {/* ======================================== */}
-        {/* HEADER */}
-        {/* ======================================== */}
         <header className="text-center mb-8 animate-fade-in">
           <Ornament className="mb-4" />
 
           {isSealed && (
             <div className="mb-4">
-              <span className="sealed-badge">✧ Sealed ✧</span>
+              <span className="sealed-badge inline-flex items-center gap-1">
+                <Star className="w-3 h-3" /> Sealed
+              </span>
             </div>
           )}
 
@@ -347,7 +331,6 @@ export default function ChapterPage() {
           )}
         </header>
 
-        {/* Author selector */}
         {!isSealed && (
           <div className="mb-6 animate-fade-in-delay-1">
             <AuthorSelector
@@ -360,12 +343,10 @@ export default function ChapterPage() {
 
         <PageDivider />
 
-        {/* ======================================== */}
-        {/* FIRST IMPRESSION */}
-        {/* ======================================== */}
         <section className="mb-8 animate-fade-in-delay-1">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h3 className="font-display text-lg text-plum">🌅 First Impression</h3>
+            <Sunrise className="w-5 h-5 text-plum" />
+            <h3 className="font-display text-lg text-plum">First Impression</h3>
             {!chapter.firstImpression && !isSealed && <AutoSaveIndicator status={firstImpressionStatus} />}
           </div>
           <p className="text-xs text-midnight-soft text-center mb-3 italic">
@@ -374,9 +355,7 @@ export default function ChapterPage() {
           {chapter.firstImpression ? (
             <div className="book-card p-4">
               <p className="font-body text-midnight italic">&ldquo;{chapter.firstImpression.text}&rdquo;</p>
-              <p className="text-xs text-lavender mt-2">
-                — {chapter.firstImpression.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
-              </p>
+              <p className="text-xs mt-2">— <AuthorBadge author={chapter.firstImpression.author} /></p>
             </div>
           ) : !isSealed ? (
             <div className="space-y-2">
@@ -396,39 +375,35 @@ export default function ChapterPage() {
 
         <GoldLine />
 
-        {/* ======================================== */}
-        {/* TABS */}
-        {/* ======================================== */}
         <nav className="mb-6">
           <div className="flex flex-wrap justify-center gap-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  px-3 py-2 rounded-full text-sm transition-all
-                  ${activeTab === tab.id
-                    ? "bg-plum text-parchment"
-                    : "bg-cream border border-parchment-dark text-midnight-soft hover:border-lavender"
-                  }
-                `}
-              >
-                <span className="mr-1">{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-sm transition-all
+                    ${activeTab === tab.id
+                      ? "bg-plum text-parchment"
+                      : "bg-cream border border-parchment-dark text-midnight-soft hover:border-lavender"
+                    }
+                  `}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
         </nav>
 
-        {/* ======================================== */}
-        {/* TAB CONTENT */}
-        {/* ======================================== */}
         <section className="mb-10 min-h-[300px]">
-          {/* Daily Journal Tab */}
           {activeTab === "days" && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="font-display text-xl text-plum text-center mb-4">
-                📖 Daily Journal
+              <h2 className="font-display text-xl text-plum text-center mb-4 flex items-center justify-center gap-2">
+                <BookOpen className="w-5 h-5" /> Daily Journal
               </h2>
               {hasDayEntries ? (
                 chapter.dayEntries.map((entry) => (
@@ -452,11 +427,10 @@ export default function ChapterPage() {
             </div>
           )}
 
-          {/* Moments Tab */}
           {activeTab === "moments" && (
             <div className="space-y-4 animate-fade-in">
-              <h2 className="font-display text-xl text-plum text-center mb-4">
-                ✨ Moments
+              <h2 className="font-display text-xl text-plum text-center mb-4 flex items-center justify-center gap-2">
+                <Sparkles className="w-5 h-5" /> Moments
               </h2>
               {!isSealed && (
                 <AddMomentForm onAdd={handleAddMoment} disabled={isSealed} />
@@ -483,7 +457,6 @@ export default function ChapterPage() {
             </div>
           )}
 
-          {/* Letters Tab */}
           {activeTab === "letters" && (
             <div className="animate-fade-in">
               <LettersSection
@@ -496,7 +469,6 @@ export default function ChapterPage() {
             </div>
           )}
 
-          {/* Time Capsules Tab */}
           {activeTab === "capsules" && (
             <div className="animate-fade-in">
               <TimeCapsuleSection
@@ -509,11 +481,10 @@ export default function ChapterPage() {
             </div>
           )}
 
-          {/* Mood Map Tab */}
           {activeTab === "moods" && (
             <div className="animate-fade-in">
-              <h2 className="font-display text-xl text-plum text-center mb-4">
-                🌙 Mood Constellation
+              <h2 className="font-display text-xl text-plum text-center mb-4 flex items-center justify-center gap-2">
+                <Moon className="w-5 h-5" /> Mood Constellation
               </h2>
               <MoodVisualization
                 dayEntries={chapter.dayEntries}
@@ -534,12 +505,10 @@ export default function ChapterPage() {
 
         <GoldLine />
 
-        {/* ======================================== */}
-        {/* LAST NIGHT THOUGHTS */}
-        {/* ======================================== */}
         <section className="mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h3 className="font-display text-lg text-plum">🌙 Last Night Thoughts</h3>
+            <Sunset className="w-5 h-5 text-plum" />
+            <h3 className="font-display text-lg text-plum">Last Night Thoughts</h3>
             {!chapter.lastNightThoughts && !isSealed && <AutoSaveIndicator status={lastNightStatus} />}
           </div>
           <p className="text-xs text-midnight-soft text-center mb-3 italic">
@@ -548,9 +517,7 @@ export default function ChapterPage() {
           {chapter.lastNightThoughts ? (
             <div className="book-card p-4">
               <p className="font-body text-midnight italic">&ldquo;{chapter.lastNightThoughts.text}&rdquo;</p>
-              <p className="text-xs text-lavender mt-2">
-                — {chapter.lastNightThoughts.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
-              </p>
+              <p className="text-xs mt-2">— <AuthorBadge author={chapter.lastNightThoughts.author} /></p>
             </div>
           ) : !isSealed ? (
             <div className="space-y-2">
@@ -570,9 +537,6 @@ export default function ChapterPage() {
 
         <GoldLine />
 
-        {/* ======================================== */}
-        {/* REFLECTION */}
-        {/* ======================================== */}
         <section className="mb-10">
           <div className="flex items-center justify-center gap-2 mb-2">
             <h2 className="font-display text-xl text-plum">Final Reflection</h2>
@@ -610,17 +574,15 @@ export default function ChapterPage() {
 
         <PageDivider />
 
-        {/* ======================================== */}
-        {/* CLOSING ACTIONS */}
-        {/* ======================================== */}
         <section className="text-center space-y-6">
           <div>
-            <button
+            <Button
               onClick={handleSealToggle}
-              className={`btn-primary ${isSealed ? "!bg-lavender !text-midnight hover:!bg-lavender/80" : ""}`}
+              icon={isSealed ? Unlock : Lock}
+              variant={isSealed ? "secondary" : "primary"}
             >
-              {isSealed ? "✧ Unseal this chapter" : "✧ Seal this chapter"}
-            </button>
+              {isSealed ? "Unseal this chapter" : "Seal this chapter"}
+            </Button>
             <p className="text-xs text-midnight-soft mt-2 italic">
               {isSealed
                 ? "Unsealing allows you to edit again"
@@ -628,13 +590,11 @@ export default function ChapterPage() {
             </p>
           </div>
 
-          {/* Print/Export button */}
           <div>
-            <Link
-              href={`/chapter/${chapterId}/print`}
-              className="btn-secondary inline-flex items-center gap-2"
-            >
-              🖨️ Print / Export PDF
+            <Link href={`/chapter/${chapterId}/print`}>
+              <Button variant="secondary" icon={Printer}>
+                Print / Export PDF
+              </Button>
             </Link>
             <p className="text-xs text-midnight-soft mt-2 italic">
               Create a beautiful printable version of this chapter
@@ -642,12 +602,14 @@ export default function ChapterPage() {
           </div>
 
           <div>
-            <button
+            <Button
+              variant="ghost"
+              icon={Trash2}
               onClick={() => setShowDeleteModal(true)}
-              className="text-sm text-red-700 hover:text-red-800 transition-colors"
+              className="text-red-700 hover:text-red-800"
             >
               Delete this chapter
-            </button>
+            </Button>
           </div>
         </section>
 
@@ -656,7 +618,6 @@ export default function ChapterPage() {
         </footer>
       </div>
 
-      {/* Modals */}
       <ConfirmModal
         isOpen={showDeleteModal}
         title="Delete Chapter"

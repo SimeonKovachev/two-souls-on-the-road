@@ -194,7 +194,7 @@ export function CloudSyncIndicator({
         disabled={isSyncing}
         className="px-2 py-1 rounded bg-lavender/20 text-plum hover:bg-lavender/40 transition-colors disabled:opacity-50"
       >
-        {isSyncing ? "Syncing..." : "☁️ Sync to cloud"}
+        {isSyncing ? "Syncing..." : "Sync to cloud"}
       </button>
       {lastSynced && (
         <span className="text-midnight-soft">

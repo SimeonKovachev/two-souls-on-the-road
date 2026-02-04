@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Ornament } from "./Ornament";
+import { Sparkles, BookOpen } from "lucide-react";
 
 interface BirthdayWelcomeProps {
   name: string;
@@ -90,9 +91,11 @@ export function BirthdayWelcome({ name, age, partnerName, onClose }: BirthdayWel
 
               <button
                 onClick={onClose}
-                className="btn-primary bg-lavender hover:bg-lavender/80 text-midnight"
+                className="btn-primary bg-lavender hover:bg-lavender/80 text-midnight inline-flex items-center gap-2"
               >
-                Open Our Book ✨
+                <BookOpen className="w-4 h-4" />
+                Open Our Book
+                <Sparkles className="w-4 h-4" />
               </button>
             </div>
           )}

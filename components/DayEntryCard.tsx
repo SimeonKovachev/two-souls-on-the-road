@@ -5,6 +5,7 @@ import { DayEntry, Mood, Author, formatDateShort, MOOD_OPTIONS, getRandomDailyPr
 import { AuthorSelector, AuthorBadge } from "./AuthorSelector";
 import { GoldLine } from "./Ornament";
 import { useAutoSave, AutoSaveIndicator } from "@/lib/useAutoSave";
+import { Button, MOOD_ICONS, Sun, Moon, Camera, HandHeart, Sparkles, Plus, ChevronDown, ChevronUp, MessageCircle } from "./ui";
 
 interface DayEntryCardProps {
   entry: DayEntry;
@@ -34,14 +35,12 @@ export function DayEntryCard({
   const [wordText, setWordText] = useState(entry.wordOfTheDay || "");
   const [promptAnswers, setPromptAnswers] = useState<Record<string, string>>({});
 
-  // Keep prompts consistent for this entry (memoize based on entry.id)
   const [availablePrompts] = useState(() =>
     entry.prompts.length > 0
       ? entry.prompts.map(p => p.question)
       : getRandomDailyPrompts(3)
   );
 
-  // Auto-save for gratitude
   const { status: gratitudeStatus, triggerSave: triggerGratitudeSave } = useAutoSave({
     delay: 800,
     onSave: useCallback(() => {
@@ -51,7 +50,6 @@ export function DayEntryCard({
     }, [gratitudeText, entry.gratitude, currentAuthor, onUpdateGratitude]),
   });
 
-  // Auto-save for word of the day
   const { status: wordStatus, triggerSave: triggerWordSave } = useAutoSave({
     delay: 800,
     onSave: useCallback(() => {
@@ -61,21 +59,18 @@ export function DayEntryCard({
     }, [wordText, entry.wordOfTheDay, onUpdateWordOfDay]),
   });
 
-  // Trigger auto-save when gratitude text changes
   useEffect(() => {
     if (gratitudeText && gratitudeText !== entry.gratitude) {
       triggerGratitudeSave();
     }
   }, [gratitudeText, entry.gratitude, triggerGratitudeSave]);
 
-  // Trigger auto-save when word text changes
   useEffect(() => {
     if (wordText && wordText !== entry.wordOfTheDay) {
       triggerWordSave();
     }
   }, [wordText, entry.wordOfTheDay, triggerWordSave]);
 
-  // Sync with props when entry changes
   useEffect(() => {
     setGratitudeText(entry.gratitude || "");
     setWordText(entry.wordOfTheDay || "");
@@ -94,14 +89,15 @@ export function DayEntryCard({
     setPromptAnswers((prev) => ({ ...prev, [question]: "" }));
   };
 
-  // Mood selection auto-saves immediately
   const handleMoodSelect = (type: "morning" | "evening", mood: Mood) => {
     onUpdateMood(type, mood);
   };
 
+  const MorningMoodIcon = entry.morningMood ? MOOD_ICONS[entry.morningMood] : null;
+  const EveningMoodIcon = entry.eveningMood ? MOOD_ICONS[entry.eveningMood] : null;
+
   return (
     <div className="book-card book-spine overflow-hidden">
-      {/* Header - always visible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full p-4 pl-6 flex items-center justify-between text-left hover:bg-moonlight/50 transition-colors active:bg-moonlight"
@@ -110,40 +106,40 @@ export function DayEntryCard({
           <h3 className="font-display text-lg text-plum">
             {formatDateShort(entry.date)}
           </h3>
-          <div className="flex flex-wrap items-center gap-2 mt-1">
-            {entry.morningMood && (
-              <span className="text-sm" title="Morning mood">
-                ☀️ {MOOD_OPTIONS.find(m => m.id === entry.morningMood)?.icon}
+          <div className="flex flex-wrap items-center gap-3 mt-1">
+            {entry.morningMood && MorningMoodIcon && (
+              <span className="inline-flex items-center gap-1 text-sm text-midnight-soft" title="Morning mood">
+                <Sun className="w-3 h-3" />
+                <MorningMoodIcon className="w-4 h-4" style={{ color: MOOD_OPTIONS.find(m => m.id === entry.morningMood)?.color }} />
               </span>
             )}
-            {entry.eveningMood && (
-              <span className="text-sm" title="Evening mood">
-                🌙 {MOOD_OPTIONS.find(m => m.id === entry.eveningMood)?.icon}
+            {entry.eveningMood && EveningMoodIcon && (
+              <span className="inline-flex items-center gap-1 text-sm text-midnight-soft" title="Evening mood">
+                <Moon className="w-3 h-3" />
+                <EveningMoodIcon className="w-4 h-4" style={{ color: MOOD_OPTIONS.find(m => m.id === entry.eveningMood)?.color }} />
               </span>
             )}
             {entry.thoughts.length > 0 && (
-              <span className="text-xs text-midnight-soft">
-                {entry.thoughts.length} thought{entry.thoughts.length !== 1 ? "s" : ""}
+              <span className="inline-flex items-center gap-1 text-xs text-midnight-soft">
+                <MessageCircle className="w-3 h-3" />
+                {entry.thoughts.length}
               </span>
             )}
             {entry.photos.length > 0 && (
-              <span className="text-xs text-midnight-soft">
-                📷 {entry.photos.length}
+              <span className="inline-flex items-center gap-1 text-xs text-midnight-soft">
+                <Camera className="w-3 h-3" />
+                {entry.photos.length}
               </span>
             )}
           </div>
         </div>
-        <span className="text-lavender text-xl font-light">
-          {isExpanded ? "−" : "+"}
-        </span>
+        {isExpanded ? <ChevronUp className="w-5 h-5 text-lavender" /> : <ChevronDown className="w-5 h-5 text-lavender" />}
       </button>
 
-      {/* Expanded content */}
       {isExpanded && (
         <div className="px-4 pb-4 pl-6 space-y-6 animate-fade-in">
           <GoldLine className="!my-2" />
 
-          {/* Author selector */}
           {!disabled && (
             <AuthorSelector
               selected={currentAuthor}
@@ -153,27 +149,27 @@ export function DayEntryCard({
             />
           )}
 
-          {/* Morning & Evening Mood - Auto-saves on selection */}
           <div className="grid grid-cols-2 gap-3">
             <MoodSelector
               label="Morning"
-              icon="☀️"
+              icon={Sun}
               selected={entry.morningMood}
               onSelect={(mood) => handleMoodSelect("morning", mood)}
               disabled={disabled}
             />
             <MoodSelector
               label="Evening"
-              icon="🌙"
+              icon={Moon}
               selected={entry.eveningMood}
               onSelect={(mood) => handleMoodSelect("evening", mood)}
               disabled={disabled}
             />
           </div>
 
-          {/* Photos */}
           <div>
-            <h4 className="font-display text-sm text-plum mb-2">Photos</h4>
+            <h4 className="font-display text-sm text-plum mb-2 flex items-center gap-2">
+              <Camera className="w-4 h-4" /> Photos
+            </h4>
             {entry.photos.length > 0 && (
               <div className="grid grid-cols-2 gap-2 mb-3">
                 {entry.photos.map((photo) => (
@@ -191,8 +187,9 @@ export function DayEntryCard({
               </div>
             )}
             {!disabled && (
-              <label className="flex items-center justify-center h-20 border-2 border-dashed border-silver-light rounded-lg cursor-pointer hover:border-lavender hover:bg-moonlight/30 transition-all active:bg-moonlight/50">
-                <span className="text-sm text-midnight-soft">📷 Add a photo</span>
+              <label className="flex items-center justify-center gap-2 h-20 border-2 border-dashed border-silver-light rounded-lg cursor-pointer hover:border-lavender hover:bg-moonlight/30 transition-all active:bg-moonlight/50">
+                <Camera className="w-4 h-4 text-midnight-soft" />
+                <span className="text-sm text-midnight-soft">Add a photo</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -200,16 +197,17 @@ export function DayEntryCard({
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) onAddPhoto(file, currentAuthor);
-                    e.target.value = ""; // Reset for same file
+                    e.target.value = "";
                   }}
                 />
               </label>
             )}
           </div>
 
-          {/* Thoughts - Saves on Enter or button click */}
           <div>
-            <h4 className="font-display text-sm text-plum mb-2">Quick thoughts</h4>
+            <h4 className="font-display text-sm text-plum mb-2 flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" /> Quick thoughts
+            </h4>
             {entry.thoughts.length > 0 && (
               <div className="space-y-2 mb-3">
                 {entry.thoughts.map((thought) => (
@@ -235,18 +233,16 @@ export function DayEntryCard({
                   className="input-field flex-1"
                   onKeyDown={(e) => e.key === "Enter" && handleAddThought()}
                 />
-                <button
+                <Button
                   onClick={handleAddThought}
                   disabled={!thoughtText.trim()}
-                  className="btn-primary px-4 disabled:opacity-50"
-                >
-                  +
-                </button>
+                  icon={Plus}
+                  size="sm"
+                />
               </div>
             )}
           </div>
 
-          {/* Journal Prompts - Saves on button click */}
           <div>
             <h4 className="font-display text-sm text-plum mb-2">Today&apos;s prompts</h4>
             <div className="space-y-3">
@@ -272,13 +268,14 @@ export function DayEntryCard({
                           className="input-field flex-1"
                           onKeyDown={(e) => e.key === "Enter" && handleAnswerPrompt(question)}
                         />
-                        <button
+                        <Button
                           onClick={() => handleAnswerPrompt(question)}
                           disabled={!promptAnswers[question]?.trim()}
-                          className="btn-secondary px-3 disabled:opacity-50"
+                          variant="secondary"
+                          size="sm"
                         >
                           Save
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <p className="text-xs text-midnight-soft italic">Not answered</p>
@@ -289,10 +286,11 @@ export function DayEntryCard({
             </div>
           </div>
 
-          {/* Gratitude - AUTO-SAVES as you type */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-display text-sm text-plum">🙏 Gratitude</h4>
+              <h4 className="font-display text-sm text-plum flex items-center gap-2">
+                <HandHeart className="w-4 h-4" /> Gratitude
+              </h4>
               <AutoSaveIndicator status={gratitudeStatus} />
             </div>
             {entry.gratitude && !gratitudeText ? (
@@ -318,10 +316,11 @@ export function DayEntryCard({
             )}
           </div>
 
-          {/* Word of the day - AUTO-SAVES as you type */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h4 className="font-display text-sm text-plum">✨ One word for today</h4>
+              <h4 className="font-display text-sm text-plum flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> One word for today
+              </h4>
               <AutoSaveIndicator status={wordStatus} />
             </div>
             {entry.wordOfTheDay && !wordText ? (
@@ -351,17 +350,18 @@ export function DayEntryCard({
   );
 }
 
-// Mini mood selector for morning/evening
 interface MoodSelectorProps {
   label: string;
-  icon: string;
+  icon: typeof Sun;
   selected?: Mood;
   onSelect: (mood: Mood) => void;
   disabled?: boolean;
 }
 
-function MoodSelector({ label, icon, selected, onSelect, disabled }: MoodSelectorProps) {
+function MoodSelector({ label, icon: Icon, selected, onSelect, disabled }: MoodSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const SelectedMoodIcon = selected ? MOOD_ICONS[selected] : null;
+  const selectedMood = selected ? MOOD_OPTIONS.find(m => m.id === selected) : null;
 
   return (
     <div className="relative">
@@ -374,38 +374,39 @@ function MoodSelector({ label, icon, selected, onSelect, disabled }: MoodSelecto
           ${disabled ? "opacity-60 cursor-not-allowed" : "hover:border-lavender active:bg-moonlight cursor-pointer"}
         `}
       >
-        <span className="text-sm text-midnight-soft">{icon} {label}</span>
-        {selected && (
-          <p className="text-2xl mt-1">
-            {MOOD_OPTIONS.find(m => m.id === selected)?.icon}
-          </p>
+        <span className="text-sm text-midnight-soft flex items-center justify-center gap-1">
+          <Icon className="w-4 h-4" /> {label}
+        </span>
+        {SelectedMoodIcon && selectedMood && (
+          <div className="mt-2 flex items-center justify-center">
+            <SelectedMoodIcon className="w-6 h-6" style={{ color: selectedMood.color }} />
+          </div>
         )}
       </button>
 
       {isOpen && (
         <>
-          {/* Backdrop to close on tap outside */}
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
           <div className="absolute top-full left-0 right-0 mt-1 bg-cream border border-silver-light rounded-lg shadow-lg z-20 p-2 grid grid-cols-5 gap-1">
-            {MOOD_OPTIONS.map((mood) => (
-              <button
-                key={mood.id}
-                onClick={() => {
-                  onSelect(mood.id);
-                  setIsOpen(false);
-                }}
-                title={mood.tooltip}
-                className={`
-                  p-2 rounded-lg text-xl hover:bg-moonlight transition-colors active:scale-95
-                  ${selected === mood.id ? "bg-lavender/30" : ""}
-                `}
-              >
-                {mood.icon}
-              </button>
-            ))}
+            {MOOD_OPTIONS.map((mood) => {
+              const MoodIcon = MOOD_ICONS[mood.id];
+              return (
+                <button
+                  key={mood.id}
+                  onClick={() => {
+                    onSelect(mood.id);
+                    setIsOpen(false);
+                  }}
+                  title={mood.tooltip}
+                  className={`
+                    p-2 rounded-lg hover:bg-moonlight transition-colors active:scale-95 flex items-center justify-center
+                    ${selected === mood.id ? "bg-lavender/30" : ""}
+                  `}
+                >
+                  <MoodIcon className="w-5 h-5" style={{ color: mood.color }} />
+                </button>
+              );
+            })}
           </div>
         </>
       )}

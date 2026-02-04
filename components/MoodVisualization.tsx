@@ -1,6 +1,6 @@
 "use client";
 
-import { DayEntry, Mood, MOOD_OPTIONS, getMoodColor, getMoodIcon, formatDateShort } from "@/lib/types";
+import { DayEntry, Mood, MOOD_OPTIONS, getMoodColor, formatDateShort } from "@/lib/types";
 
 interface MoodVisualizationProps {
   dayEntries: DayEntry[];
@@ -77,12 +77,12 @@ export function MoodVisualization({ dayEntries, overallMoods }: MoodVisualizatio
                 }}
                 title={`${option.label}: ${count} time${count !== 1 ? "s" : ""}`}
               >
-                <span
+                {/* <span
                   style={{ fontSize: `${size}px` }}
                   className="drop-shadow-lg"
                 >
                   {option.icon}
-                </span>
+                </span> */}
                 {index < 3 && (
                   <span className="text-xs text-midnight-soft mt-1">
                     {option.label}
@@ -113,13 +113,13 @@ export function MoodVisualization({ dayEntries, overallMoods }: MoodVisualizatio
                   <div
                     className="w-4 h-8 rounded-t transition-all group-hover:scale-110"
                     style={{ backgroundColor: morningColor }}
-                    title={entry.morningMood ? `Morning: ${getMoodIcon(entry.morningMood)}` : "No morning mood"}
+                    title={entry.morningMood ? `Morning: ` : "No morning mood"}
                   />
                   {/* Evening mood */}
                   <div
                     className="w-4 h-8 rounded-b transition-all group-hover:scale-110"
                     style={{ backgroundColor: eveningColor }}
-                    title={entry.eveningMood ? `Evening: ${getMoodIcon(entry.eveningMood)}` : "No evening mood"}
+                    title={entry.eveningMood ? `Evening: ` : "No evening mood"}
                   />
                   <span className="text-[8px] text-midnight-soft mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {new Date(entry.date).getDate()}
@@ -143,7 +143,7 @@ export function MoodVisualization({ dayEntries, overallMoods }: MoodVisualizatio
               key={mood}
               className="flex items-center gap-2 p-2 bg-cream rounded"
             >
-              <span className="text-lg">{option.icon}</span>
+              {/* <span className="text-lg">{option.icon}</span> */}
               <div className="flex-1">
                 <div className="flex justify-between text-xs">
                   <span className="text-midnight">{option.label}</span>

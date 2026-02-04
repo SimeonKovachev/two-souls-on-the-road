@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Moment } from "@/lib/types";
+import { Moment, Author } from "@/lib/types";
+import { Flower2, Moon, Star, Edit, Trash2 } from "lucide-react";
+import { Button } from "./ui";
 
 interface MomentCardProps {
   moment: Moment;
@@ -9,6 +11,11 @@ interface MomentCardProps {
   onUpdate?: (text: string) => void;
   onToggleFavorite?: () => void;
   disabled?: boolean;
+}
+
+function AuthorIcon({ author }: { author: Author }) {
+  const Icon = author === "ива" ? Flower2 : Moon;
+  return <Icon className="w-3 h-3" />;
 }
 
 export function MomentCard({ moment, onDelete, onUpdate, onToggleFavorite, disabled = false }: MomentCardProps) {
@@ -56,21 +63,19 @@ export function MomentCard({ moment, onDelete, onUpdate, onToggleFavorite, disab
             autoFocus
           />
           <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              className="text-xs text-plum hover:text-plum-light transition-colors"
-            >
+            <Button variant="secondary" size="sm" onClick={handleSave}>
               Save
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setEditText(moment.text);
                 setIsEditing(false);
               }}
-              className="text-xs text-midnight-soft hover:text-midnight transition-colors"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
@@ -85,23 +90,22 @@ export function MomentCard({ moment, onDelete, onUpdate, onToggleFavorite, disab
             {formatTime(moment.createdAt)}
           </span>
           {moment.author && (
-            <span className="text-xs bg-parchment-dark px-1.5 py-0.5 rounded">
-              {moment.author === "ива" ? "🌸" : "🌙"}
+            <span className="text-xs bg-parchment-dark px-1.5 py-0.5 rounded inline-flex items-center">
+              <AuthorIcon author={moment.author} />
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Favorite star */}
+        <div className="flex items-center gap-2">
           {onToggleFavorite && (
             <button
               onClick={onToggleFavorite}
-              className={`text-lg transition-all hover:scale-110 ${
+              className={`transition-all hover:scale-110 ${
                 moment.isFavorite ? "text-yellow-500" : "text-silver-light hover:text-yellow-400"
               }`}
               title={moment.isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
-              {moment.isFavorite ? "★" : "☆"}
+              <Star className={`w-4 h-4 ${moment.isFavorite ? "fill-current" : ""}`} />
             </button>
           )}
 
@@ -109,16 +113,16 @@ export function MomentCard({ moment, onDelete, onUpdate, onToggleFavorite, disab
             <>
               <button
                 onClick={() => setIsEditing(true)}
-                className="text-xs text-plum hover:text-plum-light transition-colors"
+                className="text-plum hover:text-plum-light transition-colors p-1"
               >
-                Edit
+                <Edit className="w-4 h-4" />
               </button>
               {onDelete && (
                 <button
                   onClick={onDelete}
-                  className="text-xs text-red-700 hover:text-red-800 transition-colors"
+                  className="text-red-700 hover:text-red-800 transition-colors p-1"
                 >
-                  Remove
+                  <Trash2 className="w-4 h-4" />
                 </button>
               )}
             </>

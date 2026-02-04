@@ -2,6 +2,8 @@
 
 import { useState, useRef } from "react";
 import { fileToDataUrl, compressImage } from "@/lib/storage";
+import { Camera, X, Plus } from "lucide-react";
+import { Button } from "./ui";
 
 interface AddMomentFormProps {
   onAdd: (text: string, photoDataUrl?: string) => void;
@@ -57,7 +59,6 @@ export function AddMomentForm({ onAdd, disabled = false }: AddMomentFormProps) {
         A moment I want to keep...
       </p>
 
-      {/* Photo upload */}
       <div>
         <input
           type="file"
@@ -78,24 +79,24 @@ export function AddMomentForm({ onAdd, disabled = false }: AddMomentFormProps) {
             <button
               type="button"
               onClick={clearPhoto}
-              className="absolute top-2 right-2 w-6 h-6 bg-midnight/70 text-parchment rounded-full text-xs hover:bg-midnight transition-colors"
+              className="absolute top-2 right-2 w-6 h-6 bg-midnight/70 text-parchment rounded-full flex items-center justify-center hover:bg-midnight transition-colors"
             >
-              ✕
+              <X className="w-4 h-4" />
             </button>
           </div>
         ) : (
           <label
             htmlFor="photo-upload"
-            className="flex items-center justify-center h-24 border-2 border-dashed border-parchment-dark rounded cursor-pointer hover:border-lavender transition-colors"
+            className="flex items-center justify-center gap-2 h-24 border-2 border-dashed border-parchment-dark rounded cursor-pointer hover:border-lavender hover:bg-moonlight/30 transition-all"
           >
+            <Camera className="w-5 h-5 text-midnight-soft" />
             <span className="text-sm text-midnight-soft">
-              {isUploading ? "Processing..." : "📷 Add a photo (optional)"}
+              {isUploading ? "Processing..." : "Add a photo (optional)"}
             </span>
           </label>
         )}
       </div>
 
-      {/* Text input */}
       <textarea
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -104,14 +105,14 @@ export function AddMomentForm({ onAdd, disabled = false }: AddMomentFormProps) {
         rows={2}
       />
 
-      {/* Submit button */}
-      <button
+      <Button
         type="submit"
+        fullWidth
         disabled={!text.trim()}
-        className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        icon={Plus}
       >
         Add moment
-      </button>
+      </Button>
     </form>
   );
 }

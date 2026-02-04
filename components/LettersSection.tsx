@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Letter, Author, AUTHORS, getAuthorInfo } from "@/lib/types";
-import { AuthorSelector } from "./AuthorSelector";
 import { GoldLine } from "./Ornament";
+import { Button, Mail, Send, Flower2, Moon, Check, Plus } from "./ui";
 
 interface LettersSectionProps {
   letters: Letter[];
@@ -11,6 +11,11 @@ interface LettersSectionProps {
   onCreateLetter: (from: Author, to: Author, content: string) => void;
   onMarkRead: (letterId: string) => void;
   disabled?: boolean;
+}
+
+function AuthorIcon({ author, className = "w-4 h-4" }: { author: Author; className?: string }) {
+  const Icon = author === "ива" ? Flower2 : Moon;
+  return <Icon className={className} />;
 }
 
 export function LettersSection({
@@ -49,7 +54,7 @@ export function LettersSection({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-lg text-plum flex items-center gap-2">
-          💌 Letters
+          <Mail className="w-5 h-5" /> Letters
           {unreadCount > 0 && (
             <span className="bg-plum text-parchment text-xs px-2 py-0.5 rounded-full">
               {unreadCount} new
@@ -57,21 +62,17 @@ export function LettersSection({
           )}
         </h3>
         {!disabled && !isWriting && (
-          <button
-            onClick={() => setIsWriting(true)}
-            className="btn-secondary text-sm"
-          >
-            Write a letter
-          </button>
+          <Button variant="secondary" size="sm" icon={Plus} onClick={() => setIsWriting(true)}>
+            Write
+          </Button>
         )}
       </div>
 
-      {/* Writing mode */}
       {isWriting && (
         <div className="book-card p-4 space-y-4 animate-fade-in">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-midnight-soft italic">
-              From {getAuthorInfo(currentUser).icon} {getAuthorInfo(currentUser).name}
+            <p className="text-sm text-midnight-soft italic inline-flex items-center gap-1">
+              From <AuthorIcon author={currentUser} className="w-3 h-3" /> {getAuthorInfo(currentUser).name}
             </p>
             <div className="flex items-center gap-2">
               <span className="text-sm text-midnight-soft">To:</span>
@@ -80,14 +81,14 @@ export function LettersSection({
                   key={author.id}
                   onClick={() => setSelectedRecipient(author.id)}
                   className={`
-                    flex items-center gap-1 px-3 py-1 rounded-full text-sm
+                    flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors
                     ${selectedRecipient === author.id
                       ? "bg-plum text-parchment"
-                      : "bg-cream border border-parchment-dark"
+                      : "bg-cream border border-parchment-dark hover:border-plum"
                     }
                   `}
                 >
-                  {author.icon} {author.name}
+                  <AuthorIcon author={author.id} className="w-3 h-3" /> {author.name}
                 </button>
               ))}
             </div>
@@ -103,27 +104,28 @@ export function LettersSection({
           />
 
           <div className="flex gap-2 justify-end">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setIsWriting(false);
                 setContent("");
               }}
-              className="btn-secondary text-sm"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              size="sm"
+              icon={Send}
               onClick={handleSend}
               disabled={!content.trim()}
-              className="btn-primary text-sm disabled:opacity-50"
             >
-              Send letter 💌
-            </button>
+              Send letter
+            </Button>
           </div>
         </div>
       )}
 
-      {/* Received letters */}
       {myLetters.length > 0 && (
         <div>
           <p className="text-xs text-midnight-soft mb-2">Received</p>
@@ -138,8 +140,8 @@ export function LettersSection({
                 `}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">
-                    From {getAuthorInfo(letter.from).icon} {getAuthorInfo(letter.from).name}
+                  <span className="text-sm inline-flex items-center gap-1">
+                    From <AuthorIcon author={letter.from} className="w-3 h-3" /> {getAuthorInfo(letter.from).name}
                   </span>
                   {!letter.isRead && (
                     <span className="text-xs bg-lavender text-midnight px-2 py-0.5 rounded">
@@ -156,7 +158,6 @@ export function LettersSection({
         </div>
       )}
 
-      {/* Sent letters */}
       {sentLetters.length > 0 && (
         <div>
           <p className="text-xs text-midnight-soft mb-2">Sent</p>
@@ -168,11 +169,11 @@ export function LettersSection({
                 className="w-full book-card p-3 text-left opacity-70 hover:opacity-100 transition-opacity"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">
-                    To {getAuthorInfo(letter.to).icon} {getAuthorInfo(letter.to).name}
+                  <span className="text-sm inline-flex items-center gap-1">
+                    To <AuthorIcon author={letter.to} className="w-3 h-3" /> {getAuthorInfo(letter.to).name}
                   </span>
-                  <span className="text-xs text-midnight-soft">
-                    {letter.isRead ? "Read ✓" : "Unread"}
+                  <span className="text-xs text-midnight-soft inline-flex items-center gap-1">
+                    {letter.isRead ? <><Check className="w-3 h-3" /> Read</> : "Unread"}
                   </span>
                 </div>
                 <p className="text-xs text-midnight-soft mt-1">
@@ -185,25 +186,35 @@ export function LettersSection({
       )}
 
       {letters.length === 0 && !isWriting && (
-        <p className="text-center text-midnight-soft italic text-sm py-4">
-          No letters yet. Write one to your partner!
-        </p>
+        <div className="text-center py-6">
+          <Mail className="w-10 h-10 text-plum/50 mx-auto mb-2" />
+          <p className="text-midnight-soft italic text-sm">
+            No letters yet. Write one to your partner!
+          </p>
+        </div>
       )}
 
-      {/* Reading modal */}
       {readingLetter && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-midnight/50 backdrop-blur-sm">
           <div
-            className="absolute inset-0 bg-midnight/50 backdrop-blur-sm"
+            className="absolute inset-0"
             onClick={() => setReadingLetter(null)}
           />
-          <div className="relative book-card p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto animate-fade-in">
-            <div className="text-center mb-4">
-              <p className="text-sm text-midnight-soft">
-                From {getAuthorInfo(readingLetter.from).icon} {getAuthorInfo(readingLetter.from).name}
+          <div className="relative book-card p-6 max-w-lg w-full animate-fade-in flex flex-col" style={{ maxHeight: "80vh" }}>
+            <button
+              onClick={() => setReadingLetter(null)}
+              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full hover:bg-parchment-dark transition-colors text-midnight-soft hover:text-midnight"
+              aria-label="Close"
+            >
+              <span className="text-xl leading-none">&times;</span>
+            </button>
+
+            <div className="text-center mb-4 flex-shrink-0">
+              <p className="text-sm text-midnight-soft inline-flex items-center justify-center gap-1">
+                From <AuthorIcon author={readingLetter.from} className="w-3 h-3" /> {getAuthorInfo(readingLetter.from).name}
               </p>
-              <p className="text-sm text-midnight-soft">
-                To {getAuthorInfo(readingLetter.to).icon} {getAuthorInfo(readingLetter.to).name}
+              <p className="text-sm text-midnight-soft inline-flex items-center justify-center gap-1 ml-3">
+                To <AuthorIcon author={readingLetter.to} className="w-3 h-3" /> {getAuthorInfo(readingLetter.to).name}
               </p>
               <p className="text-xs text-lavender mt-1">
                 {new Date(readingLetter.createdAt).toLocaleDateString()}
@@ -212,18 +223,17 @@ export function LettersSection({
 
             <GoldLine />
 
-            <p className="font-body text-midnight leading-relaxed whitespace-pre-wrap">
-              {readingLetter.content}
-            </p>
+            <div className="flex-1 overflow-y-auto py-4 min-h-0">
+              <p className="font-body text-midnight leading-relaxed whitespace-pre-wrap">
+                {readingLetter.content}
+              </p>
+            </div>
 
             <GoldLine />
 
-            <button
-              onClick={() => setReadingLetter(null)}
-              className="btn-secondary w-full mt-4"
-            >
+            <Button variant="secondary" fullWidth className="mt-4 flex-shrink-0" onClick={() => setReadingLetter(null)}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}

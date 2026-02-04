@@ -1,6 +1,7 @@
 "use client";
 
 import { Author, AUTHORS } from "@/lib/types";
+import { Flower2, Moon } from "lucide-react";
 
 interface AuthorSelectorProps {
   selected: Author;
@@ -9,6 +10,11 @@ interface AuthorSelectorProps {
   disabled?: boolean;
 }
 
+const AUTHOR_ICONS = {
+  ива: Flower2,
+  мео: Moon,
+} as const;
+
 export function AuthorSelector({ selected, onChange, label, disabled = false }: AuthorSelectorProps) {
   return (
     <div className="space-y-2">
@@ -16,25 +22,28 @@ export function AuthorSelector({ selected, onChange, label, disabled = false }: 
         <p className="text-sm text-midnight-soft font-body italic">{label}</p>
       )}
       <div className="flex gap-2">
-        {AUTHORS.map((author) => (
-          <button
-            key={author.id}
-            onClick={() => onChange(author.id)}
-            disabled={disabled}
-            className={`
-              flex items-center gap-2 px-4 py-2 rounded-full
-              border transition-all
-              ${selected === author.id
-                ? "bg-plum text-parchment border-plum"
-                : "bg-cream border-parchment-dark text-midnight-soft hover:border-lavender"
-              }
-              ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-            `}
-          >
-            <span>{author.icon}</span>
-            <span className="font-display text-sm">{author.name}</span>
-          </button>
-        ))}
+        {AUTHORS.map((author) => {
+          const Icon = AUTHOR_ICONS[author.id];
+          return (
+            <button
+              key={author.id}
+              onClick={() => onChange(author.id)}
+              disabled={disabled}
+              className={`
+                flex items-center gap-2 px-4 py-2 rounded-full
+                border transition-all
+                ${selected === author.id
+                  ? "bg-plum text-parchment border-plum"
+                  : "bg-cream border-parchment-dark text-midnight-soft hover:border-lavender"
+                }
+                ${disabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+              `}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="font-display text-sm">{author.name}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -49,6 +58,9 @@ export function AuthorBadge({ author, size = "sm" }: AuthorBadgeProps) {
   const authorInfo = AUTHORS.find((a) => a.id === author);
   if (!authorInfo) return null;
 
+  const Icon = AUTHOR_ICONS[author];
+  const iconSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
+
   return (
     <span
       className={`
@@ -57,7 +69,7 @@ export function AuthorBadge({ author, size = "sm" }: AuthorBadgeProps) {
         bg-parchment-dark text-midnight-soft
       `}
     >
-      <span>{authorInfo.icon}</span>
+      <Icon className={iconSize} />
       <span>{authorInfo.name}</span>
     </span>
   );

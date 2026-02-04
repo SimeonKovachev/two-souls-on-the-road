@@ -1,30 +1,32 @@
 "use client";
 
+import { Star } from "lucide-react";
+
 interface OrnamentProps {
   className?: string;
 }
 
 export function Ornament({ className = "" }: OrnamentProps) {
   return (
-    <div className={`ornament text-center ${className}`}>
-      ✦ ✧ ✦
+    <div className={`text-center flex items-center justify-center gap-2 text-lavender ${className}`}>
+      <Star className="w-3 h-3 fill-current" />
+      <Star className="w-4 h-4" />
+      <Star className="w-3 h-3 fill-current" />
     </div>
   );
 }
 
-// Renamed from GoldLine to MysticLine (purple/silver gradient)
 export function GoldLine({ className = "" }: OrnamentProps) {
   return <div className={`mystic-line w-full my-6 ${className}`} />;
 }
 
-// Alias for backwards compatibility
 export const MysticLine = GoldLine;
 
 export function PageDivider({ className = "" }: OrnamentProps) {
   return (
     <div className={`flex items-center justify-center gap-4 my-8 ${className}`}>
       <div className="mystic-line flex-1 max-w-[100px]" />
-      <span className="text-lavender text-sm">✧</span>
+      <Star className="w-4 h-4 text-lavender" />
       <div className="mystic-line flex-1 max-w-[100px]" />
     </div>
   );

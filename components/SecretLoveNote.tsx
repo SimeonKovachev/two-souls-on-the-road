@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SpecialDate, AppSettings } from "@/lib/types";
+import { SpecialDate, AppSettings, Author } from "@/lib/types";
 import { Ornament } from "./Ornament";
+import { Button, Gift, Heart, Flower2, Moon, Star } from "./ui";
 
 interface SecretLoveNoteProps {
   onClose: () => void;
   note: SpecialDate;
+}
+
+function AuthorIcon({ author }: { author: Author }) {
+  const Icon = author === "ива" ? Flower2 : Moon;
+  return <Icon className="w-4 h-4 inline" />;
 }
 
 export function SecretLoveNote({ onClose, note }: SecretLoveNoteProps) {
@@ -18,21 +24,19 @@ export function SecretLoveNote({ onClose, note }: SecretLoveNoteProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-midnight/90 backdrop-blur-md p-4">
-      {/* Sparkles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(15)].map((_, i) => (
-          <span
+          <Star
             key={i}
             className="absolute text-lavender animate-pulse"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 2}s`,
-              fontSize: `${Math.random() * 12 + 8}px`,
+              width: `${Math.random() * 12 + 8}px`,
+              height: `${Math.random() * 12 + 8}px`,
             }}
-          >
-            ✦
-          </span>
+          />
         ))}
       </div>
 
@@ -45,7 +49,7 @@ export function SecretLoveNote({ onClose, note }: SecretLoveNoteProps) {
       >
         <Ornament className="mb-4" />
 
-        <p className="text-4xl mb-4">💝</p>
+        <Gift className="w-12 h-12 text-plum mx-auto mb-4" />
 
         <h2 className="font-display text-xl text-plum mb-2">{note.title}</h2>
 
@@ -55,19 +59,18 @@ export function SecretLoveNote({ onClose, note }: SecretLoveNoteProps) {
           </p>
         </div>
 
-        <p className="text-sm text-lavender mb-6">
-          — {note.author === "ива" ? "🌸 Ива" : "🌙 Мео"}
+        <p className="text-sm text-lavender mb-6 inline-flex items-center justify-center gap-1">
+          — <AuthorIcon author={note.author} /> {note.author === "ива" ? "Ива" : "Мео"}
         </p>
 
-        <button onClick={onClose} className="btn-primary">
-          Close with Love ✨
-        </button>
+        <Button onClick={onClose} icon={Heart}>
+          Close with Love
+        </Button>
       </div>
     </div>
   );
 }
 
-// Check if there's a note for today
 export function getTodaysNote(settings: AppSettings): SpecialDate | null {
   if (!settings.specialDates || settings.specialDates.length === 0) {
     return null;
@@ -80,13 +83,12 @@ export function getTodaysNote(settings: AppSettings): SpecialDate | null {
   return (
     settings.specialDates.find(
       (note) =>
-        note.date === todayMMDD || // MM-DD format (annual)
-        note.date === todayFull // YYYY-MM-DD format (specific year)
+        note.date === todayMMDD ||
+        note.date === todayFull
     ) || null
   );
 }
 
-// Check if it's birthday
 export function isTodayBirthday(settings: AppSettings): { name: string; birthday: string } | null {
   const today = new Date();
   const todayMMDD = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;

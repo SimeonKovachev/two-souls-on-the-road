@@ -3,6 +3,9 @@ import { Playfair_Display, Libre_Baskerville } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { DarkModeProvider } from "@/components/DarkModeProvider";
+import { PinLock } from "@/components/PinLock";
+import { NotificationProvider } from "@/components/NotificationProvider";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const playfair = Playfair_Display({
   variable: "--font-display",
@@ -21,7 +24,7 @@ const libreBaskerville = Libre_Baskerville({
 
 export const metadata: Metadata = {
   title: "Two Souls on the Road",
-  description: "A living book of our journeys — Ива ✧ Мео",
+  description: "A living book of our journeys — Ива & Мео",
   icons: {
     icon: "/icon.svg",
     apple: "/icon.svg",
@@ -53,10 +56,15 @@ export default function RootLayout({
         className={`${playfair.variable} ${libreBaskerville.variable} antialiased`}
       >
         <DarkModeProvider>
-          <div className="min-h-screen paper-texture">
-            {children}
-          </div>
-          <BottomNav />
+          <NotificationProvider>
+            <PinLock>
+              <div className="min-h-screen paper-texture">
+                {children}
+              </div>
+              <BottomNav />
+              <InstallPrompt />
+            </PinLock>
+          </NotificationProvider>
         </DarkModeProvider>
       </body>
     </html>
