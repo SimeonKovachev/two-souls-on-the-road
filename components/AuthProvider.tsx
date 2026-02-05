@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Author } from "@/lib/types";
 import { checkAuthState, login, logout, setupPassword, AuthState } from "@/lib/auth";
+import { notificationChecker } from "@/lib/notifications";
 import { Button, Lock, Flower2, Moon, Eye, EyeOff } from "./ui";
 
 interface AuthContextType {
@@ -30,6 +31,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
   }, []);
+
+  // Start notification checker when authenticated
+  useEffect(() => {
+    if (authState?.isAuthenticated && authState.currentUser) {
+      notificationChecker.init().then((initialized) => {
+        if (initialized) {
+          notificationChecker.startChecking(authState.currentUser!, 60000); // Check every minute
+        }
+      });
+    }
+
+    return () => {
+      notificationChecker.stopChecking();
+    };
+  }, [authState?.isAuthenticated, authState?.currentUser]);
 
   const handleLogin = async (password: string, user: Author) => {
     const success = await login(password, user);

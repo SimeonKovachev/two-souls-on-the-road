@@ -15,6 +15,7 @@ import {
   getRandomReflectionPrompt,
   getRandomDailyPrompts,
 } from "./types";
+import { scheduleChapterNotifications, deleteChapterNotifications } from "./notifications";
 
 const STORAGE_KEY = "two-souls-chapters";
 const isBrowser = typeof window !== "undefined";
@@ -181,6 +182,8 @@ export async function createChapter(
       // Create day entries if dates are provided
       if (dateFrom && dateTo && data) {
         await createDayEntriesForChapter(data.id, dateFrom, dateTo);
+        // Schedule notifications for the chapter (morning/evening reminders + memory notifications)
+        await scheduleChapterNotifications(data.id, dateFrom, dateTo, destination);
       }
 
       return transformChapterFromDB(data);
@@ -317,6 +320,9 @@ export function updateChapterLocal(id: string, updates: Partial<Chapter>): Chapt
 export async function deleteChapter(id: string): Promise<void> {
   if (isSupabaseConfigured()) {
     try {
+      // Delete pending notifications for this chapter
+      await deleteChapterNotifications(id);
+
       const { error } = await supabase.from("chapters").delete().eq("id", id);
       if (error) throw error;
       return;

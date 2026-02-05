@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { AppSettings, SpecialDate, generateId, Author } from "@/lib/types";
+import { AppSettings, Author } from "@/lib/types";
 import { loadSettings, saveSettings } from "@/lib/settings";
+import { createSecretNote, getAllSecretNotes, deleteSecretNote, SecretNote } from "@/lib/notifications";
+import { subscribeToPush, unsubscribeFromPush, isSubscribedToPush, isPushSupported } from "@/lib/push-notifications";
 import { Ornament, PageDivider } from "@/components/Ornament";
 import { BottomNavSpacer } from "@/components/BottomNav";
 import { useDarkMode } from "@/components/DarkModeProvider";
 import { useNotifications } from "@/components/NotificationProvider";
 import { useAuth } from "@/components/AuthProvider";
-import { Moon, Bell, Lock, Heart, Cake, Gift, Flower2, ArrowLeft, X, Check, Plus, LogOut, User, Loader2 } from "lucide-react";
+import { Moon, Bell, Heart, Cake, Gift, Flower2, ArrowLeft, X, Check, Plus, LogOut, User, Loader2, Calendar, Clock, BellRing, BellOff } from "lucide-react";
 
 const DEFAULT_SETTINGS: AppSettings = {
   darkMode: false,
@@ -19,26 +21,33 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [secretNotes, setSecretNotes] = useState<SecretNote[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { isSupported: notificationsSupported, permission, requestPermission } = useNotifications();
+  const { isSupported: notificationsSupported, permission, requestPermission, sendLocalNotification } = useNotifications();
   const { currentUser, logout } = useAuth();
 
+  const [showNoteForm, setShowNoteForm] = useState(false);
   const [newNote, setNewNote] = useState({
-    date: "",
     title: "",
     message: "",
-    author: "мео" as Author,
-    isSecret: true,
+    recipient: (currentUser === "ива" ? "мео" : "ива") as Author,
+    showDate: "",
+    showTime: "12:00",
   });
-  const [showNoteForm, setShowNoteForm] = useState(false);
+
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
 
   useEffect(() => {
-    loadSettings().then((loaded) => {
+    Promise.all([loadSettings(), getAllSecretNotes()]).then(([loaded, notes]) => {
       setSettings(loaded);
+      setSecretNotes(notes);
       setIsLoaded(true);
     });
+    // Check push subscription status
+    isSubscribedToPush().then(setPushSubscribed);
   }, []);
 
   const updateSettings = useCallback(async (updates: Partial<AppSettings>) => {
@@ -49,42 +58,62 @@ export default function SettingsPage() {
     setIsSaving(false);
   }, [settings]);
 
-  // Handle dark mode toggle separately to use context
   const handleDarkModeToggle = () => {
     toggleDarkMode();
     updateSettings({ darkMode: !isDarkMode });
   };
 
-  const addSpecialDate = () => {
-    if (!newNote.date || !newNote.title || !newNote.message) return;
+  const handleAddSecretNote = async () => {
+    if (!newNote.title || !newNote.message || !newNote.showDate || !currentUser) return;
 
-    const specialDate: SpecialDate = {
-      id: generateId(),
-      date: newNote.date,
-      title: newNote.title,
-      message: newNote.message,
-      author: newNote.author,
-      isSecret: newNote.isSecret,
-    };
+    const showAt = new Date(`${newNote.showDate}T${newNote.showTime}`);
 
-    updateSettings({
-      specialDates: [...settings.specialDates, specialDate],
-    });
+    const success = await createSecretNote(
+      newNote.title,
+      newNote.message,
+      currentUser,
+      newNote.recipient,
+      showAt
+    );
 
-    setNewNote({
-      date: "",
-      title: "",
-      message: "",
-      author: "мео",
-      isSecret: true,
-    });
-    setShowNoteForm(false);
+    if (success) {
+      const notes = await getAllSecretNotes();
+      setSecretNotes(notes);
+      setNewNote({
+        title: "",
+        message: "",
+        recipient: currentUser === "ива" ? "мео" : "ива",
+        showDate: "",
+        showTime: "12:00",
+      });
+      setShowNoteForm(false);
+    }
   };
 
-  const removeSpecialDate = (id: string) => {
-    updateSettings({
-      specialDates: settings.specialDates.filter((d) => d.id !== id),
+  const handleDeleteNote = async (noteId: string) => {
+    await deleteSecretNote(noteId);
+    setSecretNotes(secretNotes.filter(n => n.id !== noteId));
+  };
+
+  const handleTestNotification = () => {
+    sendLocalNotification("Test Notification", {
+      body: `Тест от ${currentUser === "ива" ? "Ива" : "Мео"}! Нотификациите работят!`,
     });
+  };
+
+  const handlePushToggle = async () => {
+    if (!currentUser) return;
+    setPushLoading(true);
+
+    if (pushSubscribed) {
+      const success = await unsubscribeFromPush();
+      if (success) setPushSubscribed(false);
+    } else {
+      const success = await subscribeToPush(currentUser);
+      if (success) setPushSubscribed(true);
+    }
+
+    setPushLoading(false);
   };
 
   if (!isLoaded) {
@@ -98,7 +127,6 @@ export default function SettingsPage() {
   return (
     <main className="min-h-screen px-4 py-8 pb-24 md:pb-12">
       <div className="max-w-lg mx-auto">
-        {/* Header */}
         <header className="text-center mb-8">
           <Ornament className="mb-4" />
           <h1 className="font-display text-2xl text-plum mb-2">Settings</h1>
@@ -113,7 +141,7 @@ export default function SettingsPage() {
           </p>
         </header>
 
-        <div className="space-y-8">
+        <div className="space-y-6">
           {/* Dark Mode */}
           <section className="book-card p-4">
             <div className="flex items-center justify-between">
@@ -126,17 +154,9 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={handleDarkModeToggle}
-                className={`
-                  w-14 h-8 rounded-full transition-all relative
-                  ${isDarkMode ? "bg-plum" : "bg-silver-light"}
-                `}
+                className={`w-14 h-8 rounded-full transition-all relative ${isDarkMode ? "bg-plum" : "bg-silver-light"}`}
               >
-                <span
-                  className={`
-                    absolute top-1 w-6 h-6 rounded-full bg-parchment transition-all shadow
-                    ${isDarkMode ? "left-7" : "left-1"}
-                  `}
-                />
+                <span className={`absolute top-1 w-6 h-6 rounded-full bg-parchment transition-all shadow ${isDarkMode ? "left-7" : "left-1"}`} />
               </button>
             </div>
           </section>
@@ -152,32 +172,64 @@ export default function SettingsPage() {
                     {!notificationsSupported
                       ? "Not supported on this device"
                       : permission === "granted"
-                      ? "You'll receive alerts for special moments"
+                      ? "Journal reminders, letters, time capsules"
                       : permission === "denied"
                       ? "Notifications are blocked"
-                      : "Enable to get alerts for time capsules & messages"
+                      : "Enable for reminders and messages"
                     }
                   </p>
                 </div>
               </div>
               {notificationsSupported && permission !== "granted" && permission !== "denied" && (
-                <button
-                  onClick={requestPermission}
-                  className="btn-secondary text-sm py-2 px-4"
-                >
+                <button onClick={requestPermission} className="btn-secondary text-sm py-2 px-4">
                   Enable
                 </button>
               )}
               {permission === "granted" && (
-                <span className="text-green-600 text-sm flex items-center gap-1">
-                  <Check className="w-4 h-4" /> Enabled
-                </span>
+                <button onClick={handleTestNotification} className="btn-secondary text-sm py-2 px-4 flex items-center gap-1">
+                  <Check className="w-4 h-4" /> Test
+                </button>
               )}
               {permission === "denied" && (
                 <span className="text-red-500 text-sm">Blocked</span>
               )}
             </div>
           </section>
+
+          {/* Push Notifications - Background */}
+          {isPushSupported() && permission === "granted" && (
+            <section className="book-card p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {pushSubscribed ? (
+                    <BellRing className="w-5 h-5 text-green-600" />
+                  ) : (
+                    <BellOff className="w-5 h-5 text-plum" />
+                  )}
+                  <div>
+                    <h3 className="font-display text-plum">Background Notifications</h3>
+                    <p className="text-xs text-midnight-soft">
+                      {pushSubscribed
+                        ? "Receive notifications even when app is closed"
+                        : "Enable to get notifications when app is closed"
+                      }
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handlePushToggle}
+                  disabled={pushLoading}
+                  className={`w-14 h-8 rounded-full transition-all relative ${pushSubscribed ? "bg-green-500" : "bg-silver-light"}`}
+                >
+                  {pushLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin absolute top-1.5 left-1/2 -translate-x-1/2 text-white" />
+                  ) : (
+                    <span className={`absolute top-1 w-6 h-6 rounded-full bg-parchment transition-all shadow ${pushSubscribed ? "left-7" : "left-1"}`} />
+                  )}
+                </button>
+              </div>
+            </section>
+          )}
 
           {/* Current User & Logout */}
           <section className="book-card p-4">
@@ -208,9 +260,7 @@ export default function SettingsPage() {
               <Heart className="w-5 h-5 text-plum" />
               <div>
                 <h3 className="font-display text-plum">Anniversary Date</h3>
-                <p className="text-xs text-midnight-soft">
-                  When did your story begin? This will show a counter on the home page.
-                </p>
+                <p className="text-xs text-midnight-soft">When did your story begin?</p>
               </div>
             </div>
             <input
@@ -227,32 +277,26 @@ export default function SettingsPage() {
               <Cake className="w-5 h-5 text-plum" />
               <div>
                 <h3 className="font-display text-plum">Birthdays</h3>
-                <p className="text-xs text-midnight-soft">
-                  Get special birthday messages on these dates.
-                </p>
+                <p className="text-xs text-midnight-soft">Get special birthday messages</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-plum-light block mb-1">Ива&apos;s Birthday</label>
                 <input
-                  type="text"
-                  placeholder="MM-DD (e.g., 02-14)"
+                  type="date"
                   value={settings.ivaBirthday || ""}
                   onChange={(e) => updateSettings({ ivaBirthday: e.target.value })}
                   className="input-field text-sm"
-                  maxLength={5}
                 />
               </div>
               <div>
                 <label className="text-xs text-plum-light block mb-1">Мео&apos;s Birthday</label>
                 <input
-                  type="text"
-                  placeholder="MM-DD (e.g., 07-23)"
+                  type="date"
                   value={settings.meoBirthday || ""}
                   onChange={(e) => updateSettings({ meoBirthday: e.target.value })}
                   className="input-field text-sm"
-                  maxLength={5}
                 />
               </div>
             </div>
@@ -267,9 +311,7 @@ export default function SettingsPage() {
                 <Gift className="w-5 h-5 text-plum" />
                 <div>
                   <h3 className="font-display text-plum">Secret Love Notes</h3>
-                  <p className="text-xs text-midnight-soft">
-                    Hidden messages that appear on special dates
-                  </p>
+                  <p className="text-xs text-midnight-soft">Schedule surprise messages</p>
                 </div>
               </div>
               <button
@@ -280,19 +322,11 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            {/* Add note form */}
             {showNoteForm && (
               <div className="space-y-3 p-3 bg-moonlight/50 rounded-lg mb-4 animate-fade-in">
                 <input
                   type="text"
-                  placeholder="Date (MM-DD or YYYY-MM-DD)"
-                  value={newNote.date}
-                  onChange={(e) => setNewNote({ ...newNote, date: e.target.value })}
-                  className="input-field text-sm"
-                />
-                <input
-                  type="text"
-                  placeholder="Title (e.g., 'Our First Kiss')"
+                  placeholder="Title (e.g., 'I Love You')"
                   value={newNote.title}
                   onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
                   className="input-field text-sm"
@@ -304,65 +338,70 @@ export default function SettingsPage() {
                   className="textarea-field text-sm"
                   rows={3}
                 />
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 text-sm text-midnight-soft">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-midnight-soft flex items-center gap-1 mb-1">
+                      <Calendar className="w-3 h-3" /> Show on date
+                    </label>
                     <input
-                      type="checkbox"
-                      checked={newNote.isSecret}
-                      onChange={(e) => setNewNote({ ...newNote, isSecret: e.target.checked })}
-                      className="rounded"
+                      type="date"
+                      value={newNote.showDate}
+                      onChange={(e) => setNewNote({ ...newNote, showDate: e.target.value })}
+                      className="input-field text-sm"
                     />
-                    Secret (only shown on this date)
-                  </label>
+                  </div>
+                  <div>
+                    <label className="text-xs text-midnight-soft flex items-center gap-1 mb-1">
+                      <Clock className="w-3 h-3" /> At time
+                    </label>
+                    <input
+                      type="time"
+                      value={newNote.showTime}
+                      onChange={(e) => setNewNote({ ...newNote, showTime: e.target.value })}
+                      className="input-field text-sm"
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <select
-                    value={newNote.author}
-                    onChange={(e) => setNewNote({ ...newNote, author: e.target.value as Author })}
+                    value={newNote.recipient}
+                    onChange={(e) => setNewNote({ ...newNote, recipient: e.target.value as Author })}
                     className="input-field text-sm flex-1"
                   >
-                    <option value="ива">From Ива</option>
-                    <option value="мео">From Мео</option>
+                    <option value="ива">Send to Ива</option>
+                    <option value="мео">Send to Мео</option>
                   </select>
                   <button
-                    onClick={addSpecialDate}
-                    disabled={!newNote.date || !newNote.title || !newNote.message}
+                    onClick={handleAddSecretNote}
+                    disabled={!newNote.title || !newNote.message || !newNote.showDate}
                     className="btn-primary text-sm disabled:opacity-50"
                   >
-                    Save Note
+                    Schedule
                   </button>
                 </div>
               </div>
             )}
 
-            {/* List of notes */}
-            {settings.specialDates.length === 0 ? (
+            {secretNotes.length === 0 ? (
               <p className="text-center text-midnight-soft italic text-sm py-4">
-                No secret notes yet. Add one for a special surprise!
+                No secret notes yet. Surprise your partner!
               </p>
             ) : (
               <div className="space-y-2">
-                {settings.specialDates.map((note) => (
-                  <div
-                    key={note.id}
-                    className="flex items-center justify-between p-2 bg-cream rounded-lg"
-                  >
+                {secretNotes.map((note) => (
+                  <div key={note.id} className="flex items-center justify-between p-2 bg-cream rounded-lg">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-display text-plum">{note.title}</p>
                       <p className="text-xs text-midnight-soft flex items-center gap-1">
-                        {note.date} •
-                        <span className="inline-flex items-center gap-0.5">
-                          <Flower2 className="w-3 h-3" /> {note.author === "ива" ? "Ива" : "Мео"}
-                        </span>
-                        {note.isSecret && (
-                          <span className="inline-flex items-center gap-0.5">
-                            • <Lock className="w-3 h-3" /> Secret
-                          </span>
-                        )}
+                        <Calendar className="w-3 h-3" />
+                        {new Date(note.show_at).toLocaleDateString()} at {new Date(note.show_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        <span className="mx-1">•</span>
+                        <Flower2 className="w-3 h-3" />
+                        From {note.author === "ива" ? "Ива" : "Мео"} to {note.recipient === "ива" ? "Ива" : "Мео"}
                       </p>
                     </div>
                     <button
-                      onClick={() => removeSpecialDate(note.id)}
+                      onClick={() => handleDeleteNote(note.id)}
                       className="text-red-600 hover:text-red-700 text-sm px-2"
                     >
                       <X className="w-4 h-4" />
@@ -375,7 +414,6 @@ export default function SettingsPage() {
 
           <PageDivider />
 
-          {/* Reset Welcome */}
           <section className="text-center">
             <button
               onClick={() => updateSettings({ welcomeShown: false })}
@@ -386,12 +424,8 @@ export default function SettingsPage() {
           </section>
         </div>
 
-        {/* Back link */}
         <div className="text-center mt-8">
-          <Link
-            href="/"
-            className="text-plum hover:text-plum-light transition-colors text-sm inline-flex items-center gap-2"
-          >
+          <Link href="/" className="text-plum hover:text-plum-light transition-colors text-sm inline-flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
         </div>
