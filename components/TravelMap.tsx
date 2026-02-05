@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Chapter, MapLocation } from "@/lib/types";
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 
 interface TravelMapProps {
   chapters: Chapter[];
@@ -53,55 +54,62 @@ export function TravelMap({ chapters }: TravelMapProps) {
     chapter: ch,
   }));
 
+  const centerLat = locations.reduce((sum, l) => sum + l.lat, 0) / locations.length;
+  const centerLng = locations.reduce((sum, l) => sum + l.lng, 0) / locations.length;
+  const zoom = locations.length === 1 ? 12 : 6;
+
+  const markers = locations.map(l => `${l.lat},${l.lng}`).join("~");
+
   return (
     <div className="space-y-4">
-      {/* Simple list view with map links */}
       <div className="book-card p-4">
         <h3 className="font-display text-plum mb-4 text-center">Places We&apos;ve Been</h3>
 
-        {/* Map preview - opens in new tab */}
-        <a
-          href={`https://www.openstreetmap.org/?mlat=${locations[0].lat}&mlon=${locations[0].lng}#map=5/${locations[0].lat}/${locations[0].lng}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block mb-4 rounded-lg overflow-hidden border border-silver-light hover:border-lavender transition-colors"
-        >
-          <div className="relative bg-moonlight h-48 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-4xl mb-2">🌍</p>
-              <p className="text-sm text-plum">Tap to open full map</p>
-              <p className="text-xs text-midnight-soft">{locations.length} location{locations.length !== 1 ? "s" : ""}</p>
-            </div>
-          </div>
-        </a>
+        <div className="mb-4 rounded-lg overflow-hidden border border-silver-light">
+          <iframe
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${centerLng - 1.5},${centerLat - 0.8},${centerLng + 1.5},${centerLat + 0.8}&layer=mapnik&marker=${locations[0].lat},${locations[0].lng}`}
+            className="w-full h-64 border-0"
+            loading="lazy"
+            title="Travel Map"
+          />
+          <a
+            href={`https://www.openstreetmap.org/?mlat=${centerLat}&mlon=${centerLng}#map=${zoom}/${centerLat}/${centerLng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-center py-2 text-xs text-lavender hover:text-plum bg-cream transition-colors"
+          >
+            View larger map
+          </a>
+        </div>
 
         {/* Location list */}
         <div className="space-y-2">
           {locations.map((loc) => (
-            <Link
+            <div
               key={loc.chapter.id}
-              href={`/chapter/${loc.chapter.id}`}
-              className="flex items-center gap-3 p-3 bg-cream rounded-lg hover:bg-moonlight transition-colors"
+              className="flex items-center gap-3 p-3 bg-cream rounded-lg"
             >
-              <span className="text-xl">📍</span>
-              <div className="flex-1 min-w-0">
+              <MapPin className="w-5 h-5 text-plum flex-shrink-0" />
+              <Link
+                href={`/chapter/${loc.chapter.id}`}
+                className="flex-1 min-w-0 hover:opacity-70 transition-opacity"
+              >
                 <p className="font-display text-plum text-sm truncate">
                   {loc.chapter.destination}
                 </p>
                 <p className="text-xs text-midnight-soft">
                   {loc.name}
                 </p>
-              </div>
+              </Link>
               <a
                 href={`https://www.google.com/maps?q=${loc.lat},${loc.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="text-xs text-lavender hover:text-plum px-2 py-1 rounded bg-parchment-dark"
+                className="text-xs text-lavender hover:text-plum px-2 py-1 rounded bg-parchment-dark flex-shrink-0"
               >
-                View →
+                View
               </a>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

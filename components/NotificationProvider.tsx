@@ -88,14 +88,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     // Use service worker to show notification if available
     if (swRegistration) {
       swRegistration.showNotification(title, {
-        icon: "/icon.svg",
-        badge: "/icon.svg",
+        icon: "/favicon.ico",
+        badge: "/favicon.ico",
         ...options,
       });
     } else {
       // Fallback to regular notification
       new Notification(title, {
-        icon: "/icon.svg",
+        icon: "/favicon.ico",
         ...options,
       });
     }

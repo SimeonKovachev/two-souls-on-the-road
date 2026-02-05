@@ -59,13 +59,15 @@ export function SecretLoveNote({ onClose, note }: SecretLoveNoteProps) {
           </p>
         </div>
 
-        <p className="text-sm text-lavender mb-6 inline-flex items-center justify-center gap-1">
+        <p className="text-sm text-lavender mb-6 flex items-center justify-center gap-1">
           — <AuthorIcon author={note.author} /> {note.author === "ива" ? "Ива" : "Мео"}
         </p>
 
-        <Button onClick={onClose} icon={Heart}>
-          Close with Love
-        </Button>
+        <div className="flex justify-center">
+          <Button onClick={onClose} icon={Heart}>
+            Close with Love
+          </Button>
+        </div>
       </div>
     </div>
   );

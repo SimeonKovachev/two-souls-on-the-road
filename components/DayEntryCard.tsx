@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { DayEntry, Mood, Author, formatDateShort, MOOD_OPTIONS, getRandomDailyPrompts } from "@/lib/types";
-import { AuthorSelector, AuthorBadge } from "./AuthorSelector";
+import { AuthorBadge } from "./AuthorSelector";
 import { GoldLine } from "./Ornament";
 import { useAutoSave, AutoSaveIndicator } from "@/lib/useAutoSave";
+import { useAuth } from "./AuthProvider";
 import { Button, MOOD_ICONS, Sun, Moon, Camera, HandHeart, Sparkles, Plus, ChevronDown, ChevronUp, MessageCircle } from "./ui";
 
 interface DayEntryCardProps {
@@ -28,8 +29,10 @@ export function DayEntryCard({
   onAddPhoto,
   disabled = false,
 }: DayEntryCardProps) {
+  const { currentUser } = useAuth();
+  const currentAuthor: Author = currentUser || "мео";
+
   const [isExpanded, setIsExpanded] = useState(false);
-  const [currentAuthor, setCurrentAuthor] = useState<Author>("ива");
   const [thoughtText, setThoughtText] = useState("");
   const [gratitudeText, setGratitudeText] = useState(entry.gratitude || "");
   const [wordText, setWordText] = useState(entry.wordOfTheDay || "");
@@ -141,12 +144,9 @@ export function DayEntryCard({
           <GoldLine className="!my-2" />
 
           {!disabled && (
-            <AuthorSelector
-              selected={currentAuthor}
-              onChange={setCurrentAuthor}
-              label="Who's writing?"
-              disabled={disabled}
-            />
+            <p className="text-sm text-midnight-soft italic text-center">
+              Writing as <AuthorBadge author={currentAuthor} size="sm" />
+            </p>
           )}
 
           <div className="grid grid-cols-2 gap-3">
@@ -386,27 +386,32 @@ function MoodSelector({ label, icon: Icon, selected, onSelect, disabled }: MoodS
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full left-0 right-0 mt-1 bg-cream border border-silver-light rounded-lg shadow-lg z-20 p-2 grid grid-cols-5 gap-1">
-            {MOOD_OPTIONS.map((mood) => {
-              const MoodIcon = MOOD_ICONS[mood.id];
-              return (
-                <button
-                  key={mood.id}
-                  onClick={() => {
-                    onSelect(mood.id);
-                    setIsOpen(false);
-                  }}
-                  title={mood.tooltip}
-                  className={`
-                    p-2 rounded-lg hover:bg-moonlight transition-colors active:scale-95 flex items-center justify-center
-                    ${selected === mood.id ? "bg-lavender/30" : ""}
-                  `}
-                >
-                  <MoodIcon className="w-5 h-5" style={{ color: mood.color }} />
-                </button>
-              );
-            })}
+          <div className="fixed inset-0 z-40 bg-midnight/30" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-x-4 bottom-4 sm:inset-x-auto sm:bottom-auto sm:absolute sm:top-full sm:left-1/2 sm:-translate-x-1/2 sm:mt-2 sm:w-80 bg-cream border border-silver-light rounded-xl shadow-xl z-50 p-4 max-h-[70vh] overflow-y-auto">
+            <p className="text-sm text-midnight-soft mb-3 text-center font-body">How does it feel?</p>
+            <div className="grid grid-cols-2 gap-2">
+              {MOOD_OPTIONS.map((mood) => {
+                const MoodIcon = MOOD_ICONS[mood.id];
+                return (
+                  <button
+                    key={mood.id}
+                    onClick={() => {
+                      onSelect(mood.id);
+                      setIsOpen(false);
+                    }}
+                    className={`
+                      p-3 rounded-xl transition-all active:scale-95 flex items-center gap-2 text-left
+                      ${selected === mood.id
+                        ? "bg-lavender/30 border-2 border-lavender"
+                        : "bg-moonlight/50 border-2 border-transparent hover:border-lavender/50"}
+                    `}
+                  >
+                    <MoodIcon className="w-5 h-5 flex-shrink-0" style={{ color: mood.color }} />
+                    <span className="text-sm font-medium text-midnight">{mood.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </>
       )}

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AppSettings, SpecialDate, generateId, Author } from "@/lib/types";
+import { loadSettings, saveSettings } from "@/lib/settings";
 import { Ornament, PageDivider } from "@/components/Ornament";
 import { BottomNavSpacer } from "@/components/BottomNav";
 import { useDarkMode } from "@/components/DarkModeProvider";
 import { useNotifications } from "@/components/NotificationProvider";
-import { useResetPin } from "@/components/PinLock";
-import { Moon, Bell, Lock, Heart, Cake, Gift, Flower2, ArrowLeft, X, Check, Plus } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { Moon, Bell, Lock, Heart, Cake, Gift, Flower2, ArrowLeft, X, Check, Plus, LogOut, User, Loader2 } from "lucide-react";
 
 const DEFAULT_SETTINGS: AppSettings = {
   darkMode: false,
@@ -16,30 +17,14 @@ const DEFAULT_SETTINGS: AppSettings = {
   specialDates: [],
 };
 
-function getSettings(): AppSettings {
-  if (typeof window === "undefined") return DEFAULT_SETTINGS;
-  const stored = localStorage.getItem("two-souls-settings");
-  if (!stored) return DEFAULT_SETTINGS;
-  try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(stored) };
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
-
-function saveSettings(settings: AppSettings) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("two-souls-settings", JSON.stringify(settings));
-}
-
 export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { isSupported: notificationsSupported, permission, requestPermission } = useNotifications();
-  const { resetPin } = useResetPin();
+  const { currentUser, logout } = useAuth();
 
-  // Secret love note form
   const [newNote, setNewNote] = useState({
     date: "",
     title: "",
@@ -50,15 +35,19 @@ export default function SettingsPage() {
   const [showNoteForm, setShowNoteForm] = useState(false);
 
   useEffect(() => {
-    setSettings(getSettings());
-    setIsLoaded(true);
+    loadSettings().then((loaded) => {
+      setSettings(loaded);
+      setIsLoaded(true);
+    });
   }, []);
 
-  const updateSettings = (updates: Partial<AppSettings>) => {
+  const updateSettings = useCallback(async (updates: Partial<AppSettings>) => {
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
-    saveSettings(newSettings);
-  };
+    setIsSaving(true);
+    await saveSettings(newSettings);
+    setIsSaving(false);
+  }, [settings]);
 
   // Handle dark mode toggle separately to use context
   const handleDarkModeToggle = () => {
@@ -113,7 +102,15 @@ export default function SettingsPage() {
         <header className="text-center mb-8">
           <Ornament className="mb-4" />
           <h1 className="font-display text-2xl text-plum mb-2">Settings</h1>
-          <p className="text-midnight-soft text-sm italic">Customize your memory book</p>
+          <p className="text-midnight-soft text-sm italic">
+            {isSaving ? (
+              <span className="inline-flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" /> Saving...
+              </span>
+            ) : (
+              "Customize your memory book"
+            )}
+          </p>
         </header>
 
         <div className="space-y-8">
@@ -182,21 +179,23 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          {/* PIN Security */}
+          {/* Current User & Logout */}
           <section className="book-card p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Lock className="w-5 h-5 text-plum" />
+                <User className="w-5 h-5 text-plum" />
                 <div>
-                  <h3 className="font-display text-plum">PIN Security</h3>
-                  <p className="text-xs text-midnight-soft">Protect your memories with a PIN</p>
+                  <h3 className="font-display text-plum">
+                    Logged in as {currentUser === "ива" ? "Ива" : "Мео"}
+                  </h3>
+                  <p className="text-xs text-midnight-soft">Your journal is password protected</p>
                 </div>
               </div>
               <button
-                onClick={resetPin}
-                className="btn-ghost text-sm py-2 px-4"
+                onClick={logout}
+                className="btn-ghost text-sm py-2 px-4 text-red-600 hover:text-red-700 flex items-center gap-1"
               >
-                Reset PIN
+                <LogOut className="w-4 h-4" /> Logout
               </button>
             </div>
           </section>

@@ -122,7 +122,7 @@ two-souls-on-the-road/
 │   ├── types.ts           # TypeScript types
 │   └── useAutoSave.tsx    # Auto-save hook
 └── public/                # Static assets
-    ├── icon.svg           # App icon
+    ├── favicon.ico        # App icon
     ├── manifest.json      # PWA manifest
     └── images/            # App Images
 ```

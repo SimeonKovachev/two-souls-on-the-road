@@ -26,13 +26,13 @@ import { MomentCard } from "@/components/MomentCard";
 import { AddMomentForm } from "@/components/AddMomentForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { Ornament, PageDivider, GoldLine } from "@/components/Ornament";
-import { AuthorSelector } from "@/components/AuthorSelector";
 import { DayEntryCard } from "@/components/DayEntryCard";
 import { LettersSection } from "@/components/LettersSection";
 import { TimeCapsuleSection } from "@/components/TimeCapsuleSection";
 import { MoodVisualization } from "@/components/MoodVisualization";
 import { useAutoSave, AutoSaveIndicator } from "@/lib/useAutoSave";
 import { Button } from "@/components/ui";
+import { useAuth } from "@/components/AuthProvider";
 import {
   BookOpen,
   Sparkles,
@@ -81,10 +81,11 @@ export default function ChapterPage() {
   const params = useParams();
   const router = useRouter();
   const chapterId = params.id as string;
+  const { currentUser } = useAuth();
+  const currentAuthor: Author = currentUser || "мео";
 
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [currentAuthor, setCurrentAuthor] = useState<Author>("ива");
   const [activeTab, setActiveTab] = useState<TabType>("days");
   const [reflection, setReflection] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -332,12 +333,10 @@ export default function ChapterPage() {
         </header>
 
         {!isSealed && (
-          <div className="mb-6 animate-fade-in-delay-1">
-            <AuthorSelector
-              selected={currentAuthor}
-              onChange={setCurrentAuthor}
-              label="Who's writing?"
-            />
+          <div className="mb-6 animate-fade-in-delay-1 text-center">
+            <p className="text-sm text-midnight-soft italic">
+              Writing as <AuthorBadge author={currentAuthor} />
+            </p>
           </div>
         )}
 
