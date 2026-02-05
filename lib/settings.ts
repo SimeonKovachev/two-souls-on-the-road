@@ -43,8 +43,8 @@ export async function loadSettings(): Promise<AppSettings> {
         welcomeShown: localSettings.welcomeShown,
         specialDates: localSettings.specialDates,
         anniversaryDate: data.anniversary_date || undefined,
-        ivaBirthday: data.iva_birthday ? formatDateForDisplay(data.iva_birthday) : undefined,
-        meoBirthday: data.meo_birthday ? formatDateForDisplay(data.meo_birthday) : undefined,
+        ivaBirthday: data.iva_birthday || undefined,
+        meoBirthday: data.meo_birthday || undefined,
       };
       saveLocalSettings(settings);
       return settings;
@@ -66,8 +66,8 @@ export async function saveSettings(settings: AppSettings): Promise<void> {
 
     const updateData = {
       anniversary_date: settings.anniversaryDate || null,
-      iva_birthday: settings.ivaBirthday ? parseBirthdayToDate(settings.ivaBirthday) : null,
-      meo_birthday: settings.meoBirthday ? parseBirthdayToDate(settings.meoBirthday) : null,
+      iva_birthday: settings.ivaBirthday || null,
+      meo_birthday: settings.meoBirthday || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -81,20 +81,7 @@ export async function saveSettings(settings: AppSettings): Promise<void> {
   }
 }
 
-function parseBirthdayToDate(mmdd: string): string | null {
-  if (!mmdd || !mmdd.includes("-")) return null;
-  const [month, day] = mmdd.split("-");
-  if (!month || !day) return null;
-  return `2000-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-}
-
-function formatDateForDisplay(date: string): string {
-  if (!date) return "";
-  const d = new Date(date);
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${month}-${day}`;
-}
+// Birthday dates are now stored as full YYYY-MM-DD format directly
 
 export async function addSpecialDate(date: SpecialDate): Promise<void> {
   const settings = await loadSettings();
