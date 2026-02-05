@@ -1,52 +1,54 @@
-# Two Souls on the Road 🌙✨
+# Two Souls on the Road
 
 > *A living book of our journeys — Ива & Мео*
 
 A beautiful, private travel journal web application designed for couples to document their adventures together. Built with love, magic, and a witchy purple-silver aesthetic.
 
-![Two Souls Banner](./public/images/banner.png)
-
 ---
 
-## ✨ Features
+## Features
 
 ### Core Journaling
-- **📖 Chapters** — Each trip becomes a chapter in your shared story
-- **📝 Daily Entries** — Morning & evening moods, photos, thoughts, gratitude
-- **💌 Love Letters** — Private notes between partners, revealed when read
-- **⏳ Time Capsules** — Lock messages to be opened on future dates
-- **🌟 Moments** — Quick captures of special moments with photos
+- **Chapters** — Each trip becomes a chapter in your shared story
+- **Daily Entries** — Morning & evening moods, photos, thoughts, gratitude
+- **Love Letters** — Private notes between partners, revealed when read
+- **Time Capsules** — Lock messages to be opened on future dates
+- **Moments** — Quick captures of special moments with photos
 
 ### Special Features
-- **🎂 Birthday Welcome** — Special greeting on your loved one's birthday
-- **💕 Anniversary Counter** — Days, months, years together at a glance
-- **🎲 Random Memory** — Surprise yourself with a random past moment
-- **⭐ Favorites** — Star your most precious memories
-- **🗺️ Travel Map** — See all your adventures on an interactive map
-- **🔮 Secret Love Notes** — Hidden messages that appear on special dates
+- **Birthday Welcome** — Special greeting on your loved one's birthday
+- **Anniversary Counter** — Days, months, years together at a glance
+- **Random Memory** — Surprise yourself with a random past moment
+- **Favorites** — Star your most precious memories
+- **Travel Map** — Embedded OpenStreetMap showing all your adventures
+- **Secret Love Notes** — Hidden messages that appear on special dates
 
-### Experience
-- **🌙 Dark Mode** — Beautiful witchy night theme
-- **📱 Mobile-First** — Optimized for phones, perfect for traveling
-- **☁️ Cloud Sync** — Supabase backend with localStorage fallback
-- **🖨️ PDF Export** — Print chapters as keepsakes
-- **🔍 Search** — Find any memory instantly
+### Security & Experience
+- **Password Protection** — Shared password stored securely in Supabase
+- **User Identification** — System knows who is logged in (Ива or Мео) per device
+- **Dark Mode** — Beautiful witchy night theme
+- **Mobile-First** — Optimized for phones, perfect for traveling
+- **Cloud Sync** — Supabase backend with localStorage fallback
+- **PDF Export** — Print chapters as keepsakes
+- **Search** — Find any memory instantly
+- **PWA** — Install as app on your phone
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Technology | Purpose |
 |------------|---------|
-| **Next.js 15** | React framework with App Router |
+| **Next.js 16** | React framework with App Router |
 | **TypeScript** | Type-safe development |
 | **Tailwind CSS v4** | Styling with custom theme |
-| **Supabase** | Database, auth, and storage |
-| **OpenStreetMap** | Free map integration |
+| **Supabase** | Database & authentication |
+| **OpenStreetMap** | Free embedded map |
+| **Lucide React** | Professional icons |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+
@@ -78,10 +80,18 @@ A beautiful, private travel journal web application designed for couples to docu
    ```
 
 4. **Set up Supabase database**
-   - Go to Supabase SQL Editor
-   - Run the contents of `supabase-schema.sql`
-   - Create a storage bucket named `photos` (public)
-   - See `SUPABASE-SETUP.md` for detailed instructions
+
+   Run the SQL migrations in order:
+   ```
+   supabase/migrations/001_initial_schema.sql
+   supabase/migrations/002_auth_and_settings.sql
+   ```
+
+   Required tables:
+   - `chapters` — Travel chapters
+   - `app_auth` — Password storage
+   - `user_sessions` — Device sessions (who is logged in)
+   - `app_settings` — Anniversary, birthdays, etc.
 
 5. **Run the development server**
    ```bash
@@ -95,7 +105,7 @@ A beautiful, private travel journal web application designed for couples to docu
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 two-souls-on-the-road/
@@ -108,28 +118,38 @@ two-souls-on-the-road/
 │   ├── settings/          # App settings
 │   └── globals.css        # Global styles & theme
 ├── components/            # React components
-│   ├── AnniversaryCounter.tsx
-│   ├── BirthdayWelcome.tsx
+│   ├── AuthProvider.tsx   # Password auth & user session
 │   ├── BottomNav.tsx
 │   ├── DarkModeProvider.tsx
-│   ├── MomentCard.tsx
-│   ├── RandomMemory.tsx
+│   ├── DayEntryCard.tsx
+│   ├── LettersSection.tsx
+│   ├── MoodPicker.tsx
+│   ├── NotificationProvider.tsx
 │   ├── SecretLoveNote.tsx
-│   └── TravelMap.tsx
+│   ├── TimeCapsuleSection.tsx
+│   ├── TravelMap.tsx
+│   └── ui/                # Reusable UI components
+│       ├── Button.tsx
+│       ├── icons.tsx      # Lucide icon exports
+│       └── index.tsx
 ├── lib/                   # Utilities & types
+│   ├── auth.ts            # Auth functions
+│   ├── settings.ts        # Settings sync
 │   ├── storage.ts         # Supabase + localStorage
 │   ├── supabase.ts        # Supabase client
 │   ├── types.ts           # TypeScript types
 │   └── useAutoSave.tsx    # Auto-save hook
+├── supabase/
+│   └── migrations/        # SQL migrations
 └── public/                # Static assets
-    ├── favicon.ico        # App icon
+    ├── favicon.ico
     ├── manifest.json      # PWA manifest
-    └── images/            # App Images
+    └── sw.js              # Service worker
 ```
 
 ---
 
-## 🎨 Design System
+## Design System
 
 ### Color Palette
 
@@ -145,23 +165,40 @@ two-souls-on-the-road/
 - **Display**: Playfair Display (headings)
 - **Body**: Libre Baskerville (text)
 
+### Icons
+All icons use **Lucide React** for a professional, consistent look.
+
 ---
 
-## 💾 Data Storage
+## Authentication
+
+Simple password-based protection:
+
+1. **First visit** — Create a shared password and choose who you are (Ива/Мео)
+2. **Login** — Enter password and select your name
+3. **Session** — System remembers who is logged in from each device
+4. **Logout** — Available in Settings
+
+Password is hashed and stored in Supabase `app_auth` table.
+
+---
+
+## Data Storage
 
 The app uses a **hybrid storage** approach:
 
 1. **Supabase** (primary) — Cloud database for permanent storage
 2. **localStorage** (fallback) — Works offline, automatic fallback
 
-### Supabase Free Tier Limits
-- 500 MB database — Plenty for text!
-- 1 GB storage — ~1000-2000 photos
-- 2 GB bandwidth/month — More than enough for 2 users
+### Supabase Tables
+- `chapters` — All travel chapters with moments, letters, etc.
+- `app_auth` — Hashed password
+- `user_sessions` — Device ID + user mapping
+- `app_settings` — Anniversary date, birthdays
 
 ---
 
-## 📱 PWA Support
+## PWA Support
 
 Install the app on your phone:
 1. Open in Safari (iOS) or Chrome (Android)
@@ -170,35 +207,24 @@ Install the app on your phone:
 
 ---
 
-## 🔒 Privacy
+## Privacy
 
-- **Private by design** — Only you and your partner have access
+- **Private by design** — Password protected, only you and your partner
 - **No analytics** — We don't track you
-- **Your data** — Export anytime as JSON
-- **Self-hostable** — Run your own instance
+- **Your data** — Stored in your own Supabase instance
+- **Self-hostable** — Full control over your data
 
 ---
 
-## 🤝 Contributing
+## License
 
-This is a personal project built with love, but suggestions are welcome!
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+MIT License — Feel free to use this for your own love story!
 
 ---
 
-## 📜 License
+## Credits
 
-MIT License — Feel free to use this for your own love story! 💜
-
----
-
-## 💜 Credits
-
-Built with love for **Ива** on her 23rd birthday.
+Built with love for **Ива** on her birthday.
 
 *"Every journey is better with you."*
 
@@ -206,6 +232,8 @@ Built with love for **Ива** on her 23rd birthday.
 
 <div align="center">
 
-Made with 💜 and ✨
+Made with love
+
+**Ива & Мео**
 
 </div>
