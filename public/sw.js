@@ -7,7 +7,7 @@ self.addEventListener("install", (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
         "/",
-        "/icon.svg",
+        "/favicon.ico",
         "/manifest.json",
       ]);
     })
@@ -45,8 +45,8 @@ self.addEventListener("push", (event) => {
 
   const options = {
     body: data.body || "You have a new notification",
-    icon: "/icon.svg",
-    badge: "/icon.svg",
+    icon: "/favicon.ico",
+    badge: "/favicon.ico",
     vibrate: [100, 50, 100],
     data: {
       url: data.url || "/",

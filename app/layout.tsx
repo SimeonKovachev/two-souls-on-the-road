@@ -3,7 +3,7 @@ import { Playfair_Display, Libre_Baskerville } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/BottomNav";
 import { DarkModeProvider } from "@/components/DarkModeProvider";
-import { PinLock } from "@/components/PinLock";
+import { AuthProvider } from "@/components/AuthProvider";
 import { NotificationProvider } from "@/components/NotificationProvider";
 import { InstallPrompt } from "@/components/InstallPrompt";
 
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   title: "Two Souls on the Road",
   description: "A living book of our journeys — Ива & Мео",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/favicon.ico",
+    apple: "/favicon.ico",
   },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -56,15 +56,15 @@ export default function RootLayout({
         className={`${playfair.variable} ${libreBaskerville.variable} antialiased`}
       >
         <DarkModeProvider>
-          <NotificationProvider>
-            <PinLock>
+          <AuthProvider>
+            <NotificationProvider>
               <div className="min-h-screen paper-texture">
                 {children}
               </div>
               <BottomNav />
               <InstallPrompt />
-            </PinLock>
-          </NotificationProvider>
+            </NotificationProvider>
+          </AuthProvider>
         </DarkModeProvider>
       </body>
     </html>
