@@ -42,47 +42,63 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
  * Subscribe to push notifications
  */
 export async function subscribeToPush(user: Author): Promise<boolean> {
+  console.log("[PUSH] Starting subscription for user:", user);
+
   if (!isPushSupported()) {
-    console.error("Push notifications not supported");
+    console.error("[PUSH] Not supported - serviceWorker:", "serviceWorker" in navigator, "PushManager:", "PushManager" in window);
+    alert("Push notifications are not supported on this device/browser");
     return false;
   }
 
   if (!isSupabaseConfigured()) {
-    console.error("Supabase not configured");
+    console.error("[PUSH] Supabase not configured");
+    alert("Database not configured");
     return false;
   }
 
   try {
     // Request permission if not granted
+    console.log("[PUSH] Requesting permission...");
     const permission = await requestNotificationPermission();
+    console.log("[PUSH] Permission result:", permission);
     if (permission !== "granted") {
-      console.log("Notification permission denied");
+      alert("Notification permission denied");
       return false;
     }
 
     // Get service worker registration
+    console.log("[PUSH] Getting service worker...");
     const registration = await navigator.serviceWorker.ready;
+    console.log("[PUSH] Service worker ready:", registration.scope);
 
     // Subscribe to push
+    console.log("[PUSH] Subscribing to push manager...");
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
     });
+    console.log("[PUSH] Got subscription:", subscription.endpoint);
 
     // Extract keys from subscription
     const subscriptionJson = subscription.toJSON();
     const keys = subscriptionJson.keys as { p256dh: string; auth: string };
+    console.log("[PUSH] Keys extracted, saving to database...");
 
     // Check if subscription already exists
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from("push_subscriptions")
       .select("id")
       .eq("endpoint", subscription.endpoint)
       .single();
 
+    if (selectError && selectError.code !== "PGRST116") {
+      console.error("[PUSH] Select error:", selectError);
+    }
+
     if (existing) {
       // Update existing subscription
-      await supabase
+      console.log("[PUSH] Updating existing subscription...");
+      const { error: updateError } = await supabase
         .from("push_subscriptions")
         .update({
           user_target: user,
@@ -91,20 +107,34 @@ export async function subscribeToPush(user: Author): Promise<boolean> {
           updated_at: new Date().toISOString(),
         })
         .eq("id", existing.id);
+
+      if (updateError) {
+        console.error("[PUSH] Update error:", updateError);
+        alert("Failed to update subscription: " + updateError.message);
+        return false;
+      }
     } else {
       // Insert new subscription
-      await supabase.from("push_subscriptions").insert({
+      console.log("[PUSH] Inserting new subscription...");
+      const { error: insertError } = await supabase.from("push_subscriptions").insert({
         user_target: user,
         endpoint: subscription.endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,
       });
+
+      if (insertError) {
+        console.error("[PUSH] Insert error:", insertError);
+        alert("Failed to save subscription: " + insertError.message);
+        return false;
+      }
     }
 
-    console.log("Push subscription saved successfully");
+    console.log("[PUSH] Subscription saved successfully!");
     return true;
   } catch (error) {
-    console.error("Error subscribing to push:", error);
+    console.error("[PUSH] Error:", error);
+    alert("Error subscribing: " + (error instanceof Error ? error.message : String(error)));
     return false;
   }
 }

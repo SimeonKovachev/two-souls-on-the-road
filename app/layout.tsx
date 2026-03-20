@@ -6,6 +6,7 @@ import { DarkModeProvider } from "@/components/DarkModeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { NotificationProvider } from "@/components/NotificationProvider";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import Script from "next/script";
 
 const playfair = Playfair_Display({
   variable: "--font-display",
@@ -66,6 +67,17 @@ export default function RootLayout({
             </NotificationProvider>
           </AuthProvider>
         </DarkModeProvider>
+
+        <Script id="sales-widget-config" strategy="beforeInteractive">
+          {`window.SalesWidgetConfig = {
+            tenantId: "f47d08b4-b80e-47b1-8242-3572761c9d11",
+            apiUrl: "https://construction-widget-production.up.railway.app"
+          };`}
+        </Script>
+        <Script
+          src="https://construction-widget-production.up.railway.app/widget.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
